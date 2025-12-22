@@ -35,7 +35,9 @@ const QuickTaskModal = ({ isOpen, onClose, onTaskCreated }) => {
       console.log('Fetching users...');
       const response = await organizationsAPI.getUsers();
       console.log('Users response:', response.data);
-      setUsers(response.data.users || []);
+      // Filter to only show active users
+      const activeUsers = (response.data.users || []).filter(u => u.isActive !== false);
+      setUsers(activeUsers);
     } catch (err) {
       console.error('Error fetching users:', err);
       setError('Failed to load team members');
