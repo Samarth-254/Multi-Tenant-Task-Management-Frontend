@@ -1,0 +1,137 @@
+import React, { useState, useEffect, useRef } from 'react';
+import {
+  Calendar,
+  AlertTriangle,
+  CheckCircle,
+  Circle,
+  MoreVertical,
+  Edit,
+  Trash2,
+  Eye,
+  Play,
+  Flag,
+  Tag,
+  Clock
+} from 'lucide-react';
+
+const TaskCard = ({ task, onUpdate, onDelete, onView, onEdit, userRole, currentUser, draggable, onDragStart }) => {
+  const [showMenu, setShowMenu] = useState(false);
+  const [showStatusMenu, setShowStatusMenu] = useState(false);
+  const menuRef = useRef(null);
+  const statusMenuRef = useRef(null);
+
+  // Close menus when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setShowMenu(false);
+      }
+      if (statusMenuRef.current && !statusMenuRef.current.contains(event.target)) {
+        setShowStatusMenu(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const getPriorityColor = (priority) => {
+    switch (priority) {
+      case 'High': return 'text-red-400 bg-red-900/40';
+      case 'Medium': return 'text-yellow-400 bg-yellow-900/50';
+      case 'Low': return 'text-green-400 bg-green-900/40';
+      default: return 'text-zinc-400 bg-zinc-800/50';
+    }
+  };
+
+  const daysUntilDue = Math.ceil((new Date(task.dueDate) - new Date()) / (1000 * 60 * 60 * 24));
+  const isOverdue = daysUntilDue < 0 && task.status !== 'Completed';
+
+  const handleStatusChange = (newStatus) => {
+    onUpdate(task._id, { status: newStatus });
+    setShowMenu(false);
+    setShowStatusMenu(false);
+  };
+
+  // Role-based permissions
+  const isAdmin = userRole === 'Admin';
+  const isManager = userRole === 'Manager';
+  const isMember = userRole === 'Member';
+  const currentUserId = currentUser?._id || currentUser?.id;
+  const isAssignedUser = task.assignedTo?._id === currentUserId;
+
+  const canUpdateStatus = (isAdmin || isManager) || (isMember && isAssignedUser);
+  const canManageTask = isAdmin || isManager;
+
+  // Get full name
+  const getUserName = () => {
+    const firstName = task.assignedTo?.firstName || '';
+    const lastName = task.assignedTo?.lastName || '';
+    return `${firstName} ${lastName}`.trim();
+  };
+
+  return (
+    <div 
+      draggable={draggable}
+      onDragStart={onDragStart}
+      onClick={() => onView(task)}
+      className={`bg-zinc-900/90 backdrop-blur-sm rounded-xl p-4 hover:bg-zinc-900 transition-all duration-200 cursor-pointer group`}
+    >
+      {/* Header badges */}
+      <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+        {/* Left side - Category */}
+        <div className="flex items-center gap-2">
+          {task.category && (
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium bg-zinc-800/60 text-zinc-400">
+              <Tag className="w-3 h-3" />
+              {task.category}
+            </span>
+          )}
+        </div>
+        
+        {/* Right side - Overdue */}
+        {isOverdue && (
+          <span className="inline-flex items-center gap-1 text-xs font-medium text-red-400">
+            <Clock className="w-3 h-3" />
+            Overdue
+          </span>
+        )}
+      </div>
+
+      {/* Title */}
+      <h3 className="text-white font-semibold text-base mb-2.5 leading-tight group-hover:text-zinc-50 transition-colors">
+        {task.title}
+      </h3>
+
+      {/* Description */}
+      {task.description && (
+        <p className="text-zinc-400 text-xs leading-relaxed mb-4 line-clamp-2">
+          {task.description}
+        </p>
+      )}
+
+      {/* Footer */}
+      <div className="flex items-center justify-between gap-3 pt-2">
+        {/* User Name - No Avatar */}
+        <span className="text-zinc-300 text-xs font-medium truncate">
+          {getUserName()}
+        </span>
+
+        {/* Due Date */}
+        <div className="flex items-center gap-1 text-zinc-400 flex-shrink-0">
+          <Calendar className="w-3.5 h-3.5" />
+          <span className="text-xs font-medium">
+            {new Date(task.dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+          </span>
+        </div>
+
+        {/* Priority Badge */}
+        <span className={`px-2.5 py-1 rounded-md text-xs font-semibold flex-shrink-0 ${getPriorityColor(task.priority)}`}>
+          {task.priority}
+        </span>
+      </div>
+    </div>
+  );
+};
+
+export default TaskCard;

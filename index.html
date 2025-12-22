@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TaskFlow - Multi-Tenant User Management</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              dark: {
+                50: '#f4f4f5',
+                100: '#e4e4e7',
+                200: '#d4d4d8',
+                300: '#a1a1aa',
+                400: '#71717a',
+                500: '#52525b',
+                600: '#3f3f46',
+                700: '#27272a',
+                800: '#18181b',
+                900: '#09090b',
+                950: '#000000',
+              },
+              primary: {
+                50: '#fafafa',
+                100: '#f4f4f5',
+                200: '#e4e4e7',
+                300: '#d4d4d8',
+                400: '#a1a1aa',
+                500: '#71717a',
+                600: '#52525b',
+                700: '#3f3f46',
+                800: '#27272a',
+                900: '#18181b',
+                950: '#09090b',
+              },
+              // Removed purple accents
+              success: {
+                50: '#f0fdf4',
+                100: '#dcfce7',
+                200: '#bbf7d0',
+                300: '#86efac',
+                400: '#4ade80',
+                500: '#22c55e',
+                600: '#16a34a',
+                700: '#15803d',
+                800: '#166534',
+                900: '#14532d',
+              },
+              warning: {
+                50: '#fffbeb',
+                100: '#fef3c7',
+                200: '#fde68a',
+                300: '#fcd34d',
+                400: '#fbbf24',
+                500: '#f59e0b',
+                600: '#d97706',
+                700: '#b45309',
+                800: '#92400e',
+                900: '#78350f',
+              },
+              danger: {
+                50: '#fef2f2',
+                100: '#fee2e2',
+                200: '#fecaca',
+                300: '#fca5a5',
+                400: '#f87171',
+                500: '#ef4444',
+                600: '#dc2626',
+                700: '#b91c1c',
+                800: '#991b1b',
+                900: '#7f1d1d',
+              },
+            },
+            fontFamily: {
+              sans: ['Inter', 'system-ui', 'sans-serif'],
+            },
+            boxShadow: {
+              'dark': '0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2)',
+              'dark-lg': '0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.2)',
+              'dark-xl': '0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2)',
+            },
+          },
+        },
+      }
+    </script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+      body {
+        font-family: 'Inter', system-ui, sans-serif;
+        font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+      }
+
+      /* Custom scrollbar */
+      ::-webkit-scrollbar {
+        width: 6px;
+      }
+
+      ::-webkit-scrollbar-track {
+        background: #18181b;
+      }
+
+      ::-webkit-scrollbar-thumb {
+        background: #3f3f46;
+        border-radius: 3px;
+      }
+
+      ::-webkit-scrollbar-thumb:hover {
+        background: #52525b;
+      }
+
+      /* Custom utility classes */
+      .glass-effect {
+        backdrop-filter: blur(16px);
+        background: rgba(24, 24, 27, 0.5);
+        border: 1px solid rgba(39, 39, 42, 0.5);
+      }
+
+      .card-dark {
+        background: #09090b;
+        border: 1px solid #27272a;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
+      }
+
+      .btn-primary {
+        background: #ffffff;
+        color: black;
+        font-weight: 700;
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        transition: all 0.2s;
+        box-shadow: 0 4px 6px -1px rgba(255, 255, 255, 0.1);
+        transform: translateY(0);
+      }
+
+      .btn-primary:hover {
+        background: #e4e4e7;
+        box-shadow: 0 10px 15px -3px rgba(255, 255, 255, 0.2);
+        transform: translateY(-1px);
+      }
+
+      .btn-secondary {
+        background: #334155;
+        color: #f1f5f9;
+        font-weight: 500;
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        transition: all 0.2s;
+        border: 1px solid #475569;
+      }
+
+      .btn-secondary:hover {
+        background: #475569;
+        border-color: #64748b;
+      }
+
+      .input-dark {
+        background: #1e293b;
+        border: 1px solid #475569;
+        color: #f1f5f9;
+        border-radius: 0.5rem;
+        transition: all 0.2s;
+      }
+
+      .input-dark::placeholder {
+        color: #94a3b8;
+      }
+
+      .input-dark:focus {
+        border-color: #0ea5e9;
+        outline: none;
+        box-shadow: 0 0 0 1px #0ea5e9;
+      }
+    </style>
+  </head>
+  <body class="bg-slate-900 text-slate-100">
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
