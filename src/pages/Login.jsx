@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { toast } from 'react-toastify';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { LayoutDashboard } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
@@ -33,9 +34,11 @@ const Login = () => {
     const result = await login(formData);
 
     if (result.success) {
+      toast.success('Login successful! Welcome back.');
       navigate(from, { replace: true });
     } else {
       setError(result.error);
+      toast.error(result.error || 'Login failed');
     }
 
     setIsLoading(false);

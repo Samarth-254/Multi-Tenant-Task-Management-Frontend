@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { X, Calendar, User, Flag, Tag, Clock, Save } from 'lucide-react';
+import { toast } from 'react-toastify';
+import { X, Calendar, User, Flag, Clock, Save } from 'lucide-react';
 import { organizationsAPI } from '../utils/api';
 
 const TaskEditModal = ({ isOpen, onClose, task, onSave, userRole }) => {
@@ -8,7 +9,6 @@ const TaskEditModal = ({ isOpen, onClose, task, onSave, userRole }) => {
     description: '',
     status: 'Todo',
     priority: 'Medium',
-    category: 'Other',
     dueDate: '',
     estimatedHours: '',
     actualHours: '',
@@ -26,7 +26,6 @@ const TaskEditModal = ({ isOpen, onClose, task, onSave, userRole }) => {
         description: task.description || '',
         status: task.status || 'Todo',
         priority: task.priority || 'Medium',
-        category: task.category || 'Other',
         dueDate: task.dueDate ? new Date(task.dueDate).toISOString().split('T')[0] : '',
         estimatedHours: task.estimatedHours || '',
         actualHours: task.actualHours || '',
@@ -94,9 +93,11 @@ const TaskEditModal = ({ isOpen, onClose, task, onSave, userRole }) => {
       }
 
       await onSave(task._id, updateData);
+      toast.success('Task updated successfully!');
       onClose();
     } catch (error) {
       console.error('Error updating task:', error);
+      toast.error('Failed to update task');
     } finally {
       setLoading(false);
     }
@@ -200,51 +201,26 @@ const TaskEditModal = ({ isOpen, onClose, task, onSave, userRole }) => {
             </div>
           </div>
 
-          {/* Category and Assigned User Row */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Category */}
-            <div>
-              <label className="block text-sm font-medium text-zinc-300 mb-2">
-                <Tag className="w-4 h-4 inline mr-1" />
-                Category
-              </label>
-              <select
-                name="category"
-                value={formData.category}
-                onChange={handleInputChange}
-                disabled={canOnlyEditStatus}
-                className="w-full px-4 py-2 bg-zinc-800 border border-zinc-700 text-white rounded-lg focus:outline-none focus:border-zinc-600 transition-colors"
-              >
-                <option value="Bug">Bug</option>
-                <option value="Feature">Feature</option>
-                <option value="Improvement">Improvement</option>
-                <option value="Documentation">Documentation</option>
-                <option value="Testing">Testing</option>
-                <option value="Other">Other</option>
-              </select>
-            </div>
-
-            {/* Assigned User */}
-            <div>
-              <label className="block text-sm font-medium text-zinc-300 mb-2">
-                <User className="w-4 h-4 inline mr-1" />
-                Assigned To
-              </label>
-              <select
-                name="assignedTo"
-                value={formData.assignedTo}
-                onChange={handleInputChange}
-                disabled={canOnlyEditStatus}
-                className="w-full px-4 py-2 bg-zinc-800 border border-zinc-700 text-white rounded-lg focus:outline-none focus:border-zinc-600 transition-colors"
-              >
-                <option value="">Select User</option>
-                {users.map(user => (
-                  <option key={user._id} value={user._id}>
-                    {user.firstName} {user.lastName} ({user.role})
-                  </option>
-                ))}
-              </select>
-            </div>
+          {/* Assigned User */}
+          <div>
+            <label className="block text-sm font-medium text-zinc-300 mb-2">
+              <User className="w-4 h-4 inline mr-1" />
+              Assigned To
+            </label>
+            <select
+              name="assignedTo"
+              value={formData.assignedTo}
+              onChange={handleInputChange}
+              disabled={canOnlyEditStatus}
+              className="w-full px-4 py-2 bg-zinc-800 border border-zinc-700 text-white rounded-lg focus:outline-none focus:border-zinc-600 transition-colors"
+            >
+              <option value="">Select User</option>
+              {users.map(user => (
+                <option key={user._id} value={user._id}>
+                  {user.firstName} {user.lastName} ({user.role})
+                </option>
+              ))}
+            </select>
           </div>
 
           {/* Due Date */}

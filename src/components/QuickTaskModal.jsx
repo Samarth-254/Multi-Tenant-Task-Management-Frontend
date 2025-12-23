@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { X, Plus, Calendar, User, Flag, Zap, Tag } from 'lucide-react';
+import { toast } from 'react-toastify';
+import { X, Plus, Calendar, User, Flag, Zap } from 'lucide-react';
 import { tasksAPI, organizationsAPI } from '../utils/api';
 import { useAuth } from '../context/AuthContext';
 
@@ -10,8 +11,7 @@ const QuickTaskModal = ({ isOpen, onClose, onTaskCreated }) => {
     description: '',
     assignedTo: '',
     dueDate: '',
-    priority: 'Medium',
-    category: 'Other'
+    priority: 'Medium'
   });
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -36,11 +36,13 @@ const QuickTaskModal = ({ isOpen, onClose, onTaskCreated }) => {
       const response = await organizationsAPI.getUsers();
       console.log('Users response:', response.data);
       // Filter to only show active users
-      const activeUsers = (response.data.users || []).filter(u => u.isActive !== false);
+      const activeUsers = response.data.users || [];
       setUsers(activeUsers);
     } catch (err) {
       console.error('Error fetching users:', err);
-      setError('Failed to load team members');
+      const errorMsg = 'Failed to load team members';
+      setError(errorMsg);
+      toast.error(errorMsg);
     }
   };
 
@@ -59,11 +61,14 @@ const QuickTaskModal = ({ isOpen, onClose, onTaskCreated }) => {
 
     try {
       await tasksAPI.createTask(formData);
+      toast.success('Task created successfully!');
       onTaskCreated();
       onClose();
       resetForm();
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to create task');
+      const errorMsg = err.response?.data?.message || 'Failed to create task';
+      setError(errorMsg);
+      toast.error(errorMsg);
     } finally {
       setLoading(false);
     }
@@ -75,8 +80,7 @@ const QuickTaskModal = ({ isOpen, onClose, onTaskCreated }) => {
       description: '',
       assignedTo: '',
       dueDate: '',
-      priority: 'Medium',
-      category: 'Other'
+      priority: 'Medium'
     });
     setError('');
   };
@@ -226,27 +230,6 @@ const QuickTaskModal = ({ isOpen, onClose, onTaskCreated }) => {
                 <option value="High">High</option>
               </select>
             </div>
-          </div>
-
-          {/* Category */}
-          <div>
-            <label className="block text-sm font-medium text-zinc-300 mb-2">
-              <Tag className="inline h-4 w-4 mr-1" />
-              Category
-            </label>
-            <select
-              name="category"
-              className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 text-white rounded-lg focus:outline-none focus:border-zinc-600 transition-colors"
-              value={formData.category}
-              onChange={handleChange}
-            >
-              <option value="Bug">Bug</option>
-              <option value="Feature">Feature</option>
-              <option value="Improvement">Improvement</option>
-              <option value="Documentation">Documentation</option>
-              <option value="Testing">Testing</option>
-              <option value="Other">Other</option>
-            </select>
           </div>
 
           {/* Action Buttons */}

@@ -10,7 +10,6 @@ import {
   Eye,
   Play,
   Flag,
-  Tag,
   Clock
 } from 'lucide-react';
 
@@ -75,33 +74,27 @@ const TaskCard = ({ task, onUpdate, onDelete, onView, onEdit, userRole, currentU
       draggable={draggable}
       onDragStart={onDragStart}
       onClick={() => onView(task)}
-      className={`bg-zinc-900/90 backdrop-blur-sm rounded-xl p-4 hover:bg-zinc-900 transition-all duration-200 cursor-pointer group`}
+      className={`bg-zinc-900/90 backdrop-blur-sm rounded-xl p-4 hover:bg-zinc-900 transition-all duration-200 cursor-pointer group ${isOverdue ? 'border border-red-900/50' : ''}`}
     >
-      {/* Header badges */}
-      <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
-        {/* Left side - Category */}
-        <div className="flex items-center gap-2">
-          {task.category && (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium bg-zinc-800/60 text-zinc-400">
-              <Tag className="w-3 h-3" />
-              {task.category}
-            </span>
-          )}
-        </div>
-        
-        {/* Right side - Overdue */}
-        {isOverdue && (
-          <span className="inline-flex items-center gap-1 text-xs font-medium text-red-400">
-            <Clock className="w-3 h-3" />
-            Overdue
+      {/* Overdue Badge (if present) */}
+      {isOverdue && (
+        <div className="flex justify-start mb-2">
+          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-semibold bg-red-900/60 text-red-300 border border-red-800/50">
+            <AlertTriangle className="w-3 h-3" />
+            OVERDUE
           </span>
-        )}
-      </div>
+        </div>
+      )}
 
-      {/* Title */}
-      <h3 className="text-white font-semibold text-base mb-2.5 leading-tight group-hover:text-zinc-50 transition-colors">
-        {task.title}
-      </h3>
+      {/* Title and Priority in same row */}
+      <div className="flex items-start justify-between gap-3 mb-2.5">
+        <h3 className="text-white font-semibold text-base leading-tight group-hover:text-zinc-50 transition-colors flex-1">
+          {task.title}
+        </h3>
+        <span className={`px-2.5 py-1 rounded-md text-xs font-semibold flex-shrink-0 ${getPriorityColor(task.priority)}`}>
+          {task.priority}
+        </span>
+      </div>
 
       {/* Description */}
       {task.description && (
@@ -124,11 +117,6 @@ const TaskCard = ({ task, onUpdate, onDelete, onView, onEdit, userRole, currentU
             {new Date(task.dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
           </span>
         </div>
-
-        {/* Priority Badge */}
-        <span className={`px-2.5 py-1 rounded-md text-xs font-semibold flex-shrink-0 ${getPriorityColor(task.priority)}`}>
-          {task.priority}
-        </span>
       </div>
     </div>
   );

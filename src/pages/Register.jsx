@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { toast } from 'react-toastify';
 import { Link, useNavigate } from 'react-router-dom';
 import { LayoutDashboard } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
@@ -33,9 +34,11 @@ const Register = () => {
     const result = await register(formData);
 
     if (result.success) {
+      toast.success('Registration successful! Welcome to TaskFlow.');
       navigate('/dashboard');
     } else {
       setError(result.error);
+      toast.error(result.error || 'Registration failed');
     }
 
     setIsLoading(false);

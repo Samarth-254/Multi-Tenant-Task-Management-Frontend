@@ -64,6 +64,7 @@ export const usersAPI = {
   deactivateUser: (userId) => api.put(`/users/${userId}/deactivate`),
   activateUser: (userId) => api.put(`/users/${userId}/activate`),
   changePassword: (passwords) => api.put('/users/change-password', passwords),
+  updateEmailPreferences: (preferences) => api.put('/users/email-preferences', { emailNotifications: preferences }),
 };
 
 // Tasks API

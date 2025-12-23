@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { toast } from 'react-toastify';
 import { X, Mail, UserPlus, Copy, Check } from 'lucide-react';
 import { invitationsAPI } from '../utils/api';
 
@@ -31,7 +32,9 @@ const InviteModal = ({ isOpen, onClose, onInviteSent }) => {
 
     try {
       const response = await invitationsAPI.send(formData);
-      setSuccess('Invitation sent successfully!');
+      const successMsg = 'Invitation sent successfully!';
+      setSuccess(successMsg);
+      toast.success(successMsg);
       setInviteLink(`${window.location.origin}/invite/${response.data.invitation.token}`);
       onInviteSent();
 
@@ -40,7 +43,9 @@ const InviteModal = ({ isOpen, onClose, onInviteSent }) => {
         resetForm();
       }, 2000);
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to send invitation');
+      const errorMsg = err.response?.data?.message || 'Failed to send invitation';
+      setError(errorMsg);
+      toast.error(errorMsg);
     } finally {
       setLoading(false);
     }
@@ -50,9 +55,11 @@ const InviteModal = ({ isOpen, onClose, onInviteSent }) => {
     try {
       await navigator.clipboard.writeText(inviteLink);
       setCopied(true);
+      toast.success('Invite link copied to clipboard!');
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
       console.error('Failed to copy link:', err);
+      toast.error('Failed to copy link');
     }
   };
 

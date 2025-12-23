@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { toast } from 'react-toastify';
 import {
   Plus,
   Search,
@@ -70,6 +71,12 @@ const Tasks = () => {
     const handleTaskCreated = (data) => {
       console.log('Real-time: Task created', data.task);
       setTasks(prev => [data.task, ...prev]);
+      // Show toast notification for real-time task creation by others
+      if (data.task.createdBy?._id !== user._id && data.task.createdBy?.id !== user._id) {
+        toast.info(`New task created: ${data.task.title}`, {
+          autoClose: 2000
+        });
+      }
     };
 
     const handleTaskUpdated = (data) => {
@@ -95,7 +102,7 @@ const Tasks = () => {
       socketService.off('task_updated', handleTaskUpdated);
       socketService.off('task_deleted', handleTaskDeleted);
     };
-  }, [socketService, isConnected]);
+  }, [socketService, isConnected, user]);
 
   const fetchUsers = async () => {
     try {
@@ -166,9 +173,12 @@ const Tasks = () => {
   const handleTaskUpdate = async (taskId, updates) => {
     try {
       await tasksAPI.updateTask(taskId, updates);
+      toast.success('Task updated successfully!');
       fetchTasks();
     } catch (err) {
-      setError('Failed to update task');
+      const errorMsg = 'Failed to update task';
+      setError(errorMsg);
+      toast.error(errorMsg);
       console.error('Error updating task:', err);
     }
   };
@@ -177,9 +187,12 @@ const Tasks = () => {
     if (window.confirm('Are you sure you want to delete this task?')) {
       try {
         await tasksAPI.deleteTask(taskId);
+        toast.success('Task deleted successfully!');
         fetchTasks();
       } catch (err) {
-        setError('Failed to delete task');
+        const errorMsg = 'Failed to delete task';
+        setError(errorMsg);
+        toast.error(errorMsg);
         console.error('Error deleting task:', err);
       }
     }
@@ -432,7 +445,7 @@ const Tasks = () => {
                   </div>
 
                   {/* Tasks List */}
-                  <div className="flex-1 overflow-y-auto p-3 space-y-3 scrollbar-thin scrollbar-thumb-zinc-800 scrollbar-track-transparent">
+                  <div className={`flex-1 p-3 space-y-3 ${statusTasks.length > 0 ? 'overflow-y-auto scrollbar-thin scrollbar-thumb-zinc-800 scrollbar-track-transparent' : 'overflow-hidden'}`}>
                     {statusTasks.map((task) => (
                       <div key={task._id} className="transform transition-transform duration-200 hover:-translate-y-1">
                         <TaskCard
@@ -491,7 +504,7 @@ const Tasks = () => {
                     </div>
 
                     {/* Tasks List */}
-                    <div className="flex-1 overflow-y-auto p-3 space-y-3 scrollbar-thin scrollbar-thumb-zinc-800 scrollbar-track-transparent">
+                    <div className={`flex-1 p-3 space-y-3 ${memberTasks.length > 0 ? 'overflow-y-auto scrollbar-thin scrollbar-thumb-zinc-800 scrollbar-track-transparent' : 'overflow-hidden'}`}>
                       {memberTasks.map((task) => (
                         <div key={task._id} className="transform transition-transform duration-200 hover:-translate-y-1">
                           <TaskCard

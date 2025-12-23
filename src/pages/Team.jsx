@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { toast } from 'react-toastify';
 import Layout from '../components/Layout';
 import InviteModal from '../components/InviteModal';
+import TaskReassignmentModal from '../components/TaskReassignmentModal';
 import { organizationsAPI, invitationsAPI } from '../utils/api';
 import { useAuth } from '../context/AuthContext';
 import { useSocket } from '../context/SocketContext';
@@ -13,6 +15,8 @@ const Team = () => {
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [showInviteModal, setShowInviteModal] = useState(false);
+  const [showReassignModal, setShowReassignModal] = useState(false);
+  const [userToDelete, setUserToDelete] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState('');
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
@@ -42,36 +46,46 @@ const Team = () => {
 
   const handleInviteSent = () => {
     fetchTeamData();
+    toast.success('Invitation sent successfully!');
   };
 
   const handleDeleteUser = async (userId) => {
     const userToRemove = users.find(u => u._id === userId);
     const userName = userToRemove ? `${userToRemove.firstName} ${userToRemove.lastName}` : 'this user';
 
-    if (window.confirm(`Are you sure you want to remove ${userName} from the organization? This action cannot be undone.`)) {
-      try {
-        setError(''); // Clear any previous errors
-        setSuccessMessage(''); // Clear any previous success messages
-        await organizationsAPI.removeUser(userId);
-        fetchTeamData();
-        // Show success message briefly
-        setSuccessMessage(`${userName} has been successfully removed from the organization.`);
-        setTimeout(() => setSuccessMessage(''), 5000); // Clear success message after 5 seconds
-      } catch (err) {
-        console.error('Remove user error:', err);
-        setSuccessMessage(''); // Clear any success messages
+    // Open reassignment modal
+    setUserToDelete({ id: userId, name: userName });
+    setShowReassignModal(true);
+  };
 
-        // Handle specific error messages from the backend
-        if (err.response?.data?.message) {
-          setError(err.response.data.message);
-        } else if (err.response?.status === 403) {
-          setError('You do not have permission to remove this user.');
-        } else if (err.response?.status === 400) {
-          setError('Cannot remove this user. They may have active tasks assigned or be the last admin.');
-        } else {
-          setError('Failed to remove user. Please try again.');
-        }
+  const handleConfirmDelete = async () => {
+    if (!userToDelete) return;
+    
+    try {
+      setError('');
+      setSuccessMessage('');
+      await organizationsAPI.removeUser(userToDelete.id);
+      fetchTeamData();
+      const successMsg = `${userToDelete.name} has been successfully removed from the organization.`;
+      setSuccessMessage(successMsg);
+      toast.success(successMsg);
+      setTimeout(() => setSuccessMessage(''), 5000);
+      setShowReassignModal(false);
+      setUserToDelete(null);
+    } catch (err) {
+      console.error('Remove user error:', err);
+      setSuccessMessage('');
+
+      let errorMsg = 'Failed to remove user. Please try again.';
+      if (err.response?.data?.message) {
+        errorMsg = err.response.data.message;
+      } else if (err.response?.status === 403) {
+        errorMsg = 'You do not have permission to remove this user.';
+      } else if (err.response?.status === 400) {
+        errorMsg = 'Cannot remove this user. They may be the last admin.';
       }
+      setError(errorMsg);
+      toast.error(errorMsg);
     }
   };
 
@@ -79,9 +93,12 @@ const Team = () => {
     if (window.confirm('Are you sure you want to cancel this invitation?')) {
       try {
         await invitationsAPI.cancel(invitationId);
+        toast.success('Invitation cancelled successfully!');
         fetchTeamData();
       } catch (err) {
-        setError('Failed to cancel invitation');
+        const errorMsg = 'Failed to cancel invitation';
+        setError(errorMsg);
+        toast.error(errorMsg);
       }
     }
   };
@@ -120,14 +137,13 @@ const Team = () => {
     return users.filter(user => isUserOnline(user._id)).length;
   };
 
-  // Filter users based on search query and role filter, and exclude inactive users
+  // Filter users based on search query and role filter
   const filteredUsers = users.filter(member => {
     const matchesSearch = searchQuery === '' || 
       `${member.firstName} ${member.lastName}`.toLowerCase().includes(searchQuery.toLowerCase()) ||
       member.email.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesRole = roleFilter === '' || member.role === roleFilter;
-    const isActive = member.isActive !== false; // Only show active users
-    return matchesSearch && matchesRole && isActive;
+    return matchesSearch && matchesRole;
   });
 
   const clearFilters = () => {
@@ -414,6 +430,17 @@ const Team = () => {
         isOpen={showInviteModal}
         onClose={() => setShowInviteModal(false)}
         onInviteSent={handleInviteSent}
+      />
+
+      <TaskReassignmentModal
+        isOpen={showReassignModal}
+        onClose={() => {
+          setShowReassignModal(false);
+          setUserToDelete(null);
+        }}
+        userId={userToDelete?.id}
+        userName={userToDelete?.name}
+        onReassign={handleConfirmDelete}
       />
     </Layout>
   );
