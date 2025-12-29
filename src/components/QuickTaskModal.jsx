@@ -92,12 +92,12 @@ const QuickTaskModal = ({ isOpen, onClose, onTaskCreated }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-zinc-900 border border-zinc-800 rounded-2xl w-full max-w-md shadow-2xl">
-        <div className="flex items-center justify-between p-6 border-b border-zinc-800">
+    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center z-50 p-0 sm:p-4">
+      <div className="bg-zinc-900 border border-zinc-800 rounded-t-2xl sm:rounded-2xl w-full max-w-md shadow-2xl max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between p-4 sm:p-6 border-b border-zinc-800 sticky top-0 bg-zinc-900 z-10">
           <div className="flex items-center space-x-2">
-            <Zap className="w-5 h-5 text-white" />
-            <h2 className="text-xl font-semibold text-white">Quick Task</h2>
+            <Zap className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+            <h2 className="text-lg sm:text-xl font-semibold text-white">Quick Task</h2>
           </div>
           <button
             onClick={onClose}
@@ -107,23 +107,23 @@ const QuickTaskModal = ({ isOpen, onClose, onTaskCreated }) => {
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-3 sm:space-y-4">
           {error && (
-            <div className="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-lg text-sm">
+            <div className="bg-red-500/10 border border-red-500/20 text-red-400 px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg text-xs sm:text-sm">
               {error}
             </div>
           )}
 
           {/* Task Title */}
           <div>
-            <label className="block text-sm font-medium text-zinc-300 mb-2">
+            <label className="block text-xs sm:text-sm font-medium text-zinc-300 mb-1.5 sm:mb-2">
               What needs to be done? *
             </label>
             <input
               type="text"
               name="title"
               required
-              className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 text-white placeholder-zinc-500 rounded-lg focus:outline-none focus:border-zinc-600 transition-colors"
+              className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-zinc-800 border border-zinc-700 text-white placeholder-zinc-500 rounded-lg focus:outline-none focus:border-zinc-600 transition-colors text-sm"
               placeholder="Enter task title..."
               value={formData.title}
               onChange={handleChange}
@@ -133,13 +133,13 @@ const QuickTaskModal = ({ isOpen, onClose, onTaskCreated }) => {
 
           {/* Task Description */}
           <div>
-            <label className="block text-sm font-medium text-zinc-300 mb-2">
+            <label className="block text-xs sm:text-sm font-medium text-zinc-300 mb-1.5 sm:mb-2">
               Description
             </label>
             <textarea
               name="description"
-              rows="3"
-              className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 text-white placeholder-zinc-500 rounded-lg focus:outline-none focus:border-zinc-600 transition-colors resize-none"
+              rows="2"
+              className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-zinc-800 border border-zinc-700 text-white placeholder-zinc-500 rounded-lg focus:outline-none focus:border-zinc-600 transition-colors resize-none text-sm"
               placeholder="Enter task description..."
               value={formData.description}
               onChange={handleChange}
@@ -148,15 +148,15 @@ const QuickTaskModal = ({ isOpen, onClose, onTaskCreated }) => {
 
           {/* Quick Assign Buttons */}
           <div>
-            <label className="block text-sm font-medium text-zinc-300 mb-2">
-              <User className="inline h-4 w-4 mr-1" />
+            <label className="block text-xs sm:text-sm font-medium text-zinc-300 mb-1.5 sm:mb-2">
+              <User className="inline h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1" />
               Assign to *
             </label>
-            <div className="grid grid-cols-2 gap-2 mb-3">
+            <div className="grid grid-cols-2 gap-2 mb-2 sm:mb-3">
               <button
                 type="button"
                 onClick={() => handleQuickAssign(user.id || user._id)}
-                className={`p-3 rounded-lg border transition-all text-sm ${
+                className={`p-2.5 sm:p-3 rounded-lg border transition-all text-xs sm:text-sm ${
                   formData.assignedTo === (user.id || user._id)
                     ? 'border-zinc-500 bg-zinc-800 text-white'
                     : 'border-zinc-700 bg-zinc-800 text-zinc-400 hover:border-zinc-600'
@@ -167,7 +167,7 @@ const QuickTaskModal = ({ isOpen, onClose, onTaskCreated }) => {
               <button
                 type="button"
                 onClick={() => setFormData(prev => ({ ...prev, assignedTo: '' }))}
-                className="p-3 rounded-lg border border-zinc-700 bg-zinc-800 text-zinc-400 hover:border-zinc-600 transition-all text-sm"
+                className="p-2.5 sm:p-3 rounded-lg border border-zinc-700 bg-zinc-800 text-zinc-400 hover:border-zinc-600 transition-all text-xs sm:text-sm"
               >
                 Choose person
               </button>
@@ -197,17 +197,17 @@ const QuickTaskModal = ({ isOpen, onClose, onTaskCreated }) => {
           </div>
 
           {/* Due Date & Priority Row */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-3 sm:gap-4">
             <div>
-              <label className="block text-sm font-medium text-zinc-300 mb-2">
-                <Calendar className="inline h-4 w-4 mr-1" />
+              <label className="block text-xs sm:text-sm font-medium text-zinc-300 mb-1.5 sm:mb-2">
+                <Calendar className="inline h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1" />
                 Due Date *
               </label>
               <input
                 type="date"
                 name="dueDate"
                 required
-                className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 text-white rounded-lg focus:outline-none focus:border-zinc-600 transition-colors"
+                className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-zinc-800 border border-zinc-700 text-white rounded-lg focus:outline-none focus:border-zinc-600 transition-colors text-sm"
                 value={formData.dueDate}
                 onChange={handleChange}
                 min={new Date().toISOString().split('T')[0]}
@@ -215,13 +215,13 @@ const QuickTaskModal = ({ isOpen, onClose, onTaskCreated }) => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-zinc-300 mb-2">
-                <Flag className="inline h-4 w-4 mr-1" />
+              <label className="block text-xs sm:text-sm font-medium text-zinc-300 mb-1.5 sm:mb-2">
+                <Flag className="inline h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1" />
                 Priority
               </label>
               <select
                 name="priority"
-                className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 text-white rounded-lg focus:outline-none focus:border-zinc-600 transition-colors"
+                className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-zinc-800 border border-zinc-700 text-white rounded-lg focus:outline-none focus:border-zinc-600 transition-colors text-sm"
                 value={formData.priority}
                 onChange={handleChange}
               >
@@ -233,27 +233,27 @@ const QuickTaskModal = ({ isOpen, onClose, onTaskCreated }) => {
           </div>
 
           {/* Action Buttons */}
-          <div className="flex justify-end space-x-3 pt-4">
+          <div className="flex justify-end space-x-2 sm:space-x-3 pt-3 sm:pt-4">
             <button
               type="button"
               onClick={onClose}
-              className="px-6 py-2 bg-zinc-800 hover:bg-zinc-700 text-white rounded-lg transition-colors"
+              className="px-4 sm:px-6 py-2 bg-zinc-800 hover:bg-zinc-700 text-white rounded-lg transition-colors text-sm"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="btn-primary px-6 py-2 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
+              className="btn-primary px-4 sm:px-6 py-2 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-1.5 sm:space-x-2 text-sm"
             >
               {loading ? (
                 <>
-                  <div className="w-4 h-4 border-2 border-zinc-900 border-t-white rounded-full animate-spin"></div>
+                  <div className="w-3.5 h-3.5 sm:w-4 sm:h-4 border-2 border-zinc-900 border-t-white rounded-full animate-spin"></div>
                   <span>Creating...</span>
                 </>
               ) : (
                 <>
-                  <Plus className="w-4 h-4" />
+                  <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                   <span>Create Task</span>
                 </>
               )}

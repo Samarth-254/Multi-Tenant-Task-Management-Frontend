@@ -74,46 +74,46 @@ const TaskCard = ({ task, onUpdate, onDelete, onView, onEdit, userRole, currentU
       draggable={draggable}
       onDragStart={onDragStart}
       onClick={() => onView(task)}
-      className={`bg-zinc-900/90 backdrop-blur-sm rounded-xl p-4 hover:bg-zinc-900 transition-all duration-200 cursor-pointer group ${isOverdue ? 'border border-red-900/50' : ''}`}
+      className={`relative bg-zinc-900/90 backdrop-blur-sm rounded-xl p-3 md:p-4 hover:bg-zinc-900 transition-all duration-200 cursor-pointer group ${isOverdue ? 'border border-red-900/50' : ''}`}
     >
       {/* Overdue Badge (if present) */}
       {isOverdue && (
-        <div className="flex justify-start mb-2">
-          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-semibold bg-red-900/60 text-red-300 border border-red-800/50">
-            <AlertTriangle className="w-3 h-3" />
+        <div className="flex justify-start mb-1.5 md:mb-2">
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 md:px-2.5 md:py-1 rounded-md text-[10px] md:text-xs font-semibold bg-red-900/60 text-red-300 border border-red-800/50">
+            <AlertTriangle className="w-2.5 h-2.5 md:w-3 md:h-3" />
             OVERDUE
           </span>
         </div>
       )}
 
       {/* Title and Priority in same row */}
-      <div className="flex items-start justify-between gap-3 mb-2.5">
-        <h3 className="text-white font-semibold text-base leading-tight group-hover:text-zinc-50 transition-colors flex-1">
+      <div className="flex items-start justify-between gap-2 md:gap-3 mb-2 md:mb-2.5">
+        <h3 className="text-white font-semibold text-sm md:text-base leading-tight group-hover:text-zinc-50 transition-colors flex-1 line-clamp-2">
           {task.title}
         </h3>
-        <span className={`px-2.5 py-1 rounded-md text-xs font-semibold flex-shrink-0 ${getPriorityColor(task.priority)}`}>
+        <span className={`px-2 py-0.5 md:px-2.5 md:py-1 rounded-md text-[10px] md:text-xs font-semibold flex-shrink-0 ${getPriorityColor(task.priority)}`}>
           {task.priority}
         </span>
       </div>
 
       {/* Description */}
       {task.description && (
-        <p className="text-zinc-400 text-xs leading-relaxed mb-4 line-clamp-2">
+        <p className="text-zinc-400 text-[10px] md:text-xs leading-relaxed mb-3 md:mb-4 line-clamp-2">
           {task.description}
         </p>
       )}
 
       {/* Footer */}
-      <div className="flex items-center justify-between gap-3 pt-2">
+      <div className="flex items-center justify-between gap-2 md:gap-3 pt-1.5 md:pt-2">
         {/* User Name - No Avatar */}
-        <span className="text-zinc-300 text-xs font-medium truncate">
+        <span className="text-zinc-300 text-[10px] md:text-xs font-medium truncate">
           {getUserName()}
         </span>
 
         {/* Due Date */}
         <div className="flex items-center gap-1 text-zinc-400 flex-shrink-0">
-          <Calendar className="w-3.5 h-3.5" />
-          <span className="text-xs font-medium">
+          <Calendar className="w-3 h-3 md:w-3.5 md:h-3.5" />
+          <span className="text-[10px] md:text-xs font-medium">
             {new Date(task.dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
           </span>
         </div>

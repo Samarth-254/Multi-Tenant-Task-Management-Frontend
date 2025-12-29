@@ -48,19 +48,29 @@ const Tasks = () => {
   });
   const [searchInput, setSearchInput] = useState('');
 
+  // Separate effect for non-search filters
   useEffect(() => {
     fetchTasks();
     fetchUsers();
-  }, [filters]);
+  }, [filters.status, filters.priority, filters.assignedTo, filters.category, filters.sortBy, filters.myTasks]);
 
-  // Debounced search effect
+  // Debounced search effect with longer delay to prevent interruption
   useEffect(() => {
     const timeoutId = setTimeout(() => {
-      setFilters(prev => ({ ...prev, search: searchInput }));
-    }, 300); // 300ms delay
+      if (filters.search !== searchInput) {
+        setFilters(prev => ({ ...prev, search: searchInput }));
+      }
+    }, 500); // 500ms delay for smoother typing
 
     return () => clearTimeout(timeoutId);
   }, [searchInput]);
+
+  // Fetch when search filter changes
+  useEffect(() => {
+    if (filters.search !== undefined) {
+      fetchTasks();
+    }
+  }, [filters.search]);
 
 
 
@@ -296,8 +306,103 @@ const Tasks = () => {
   return (
     <Layout showTopBar={false}>
       <div className="h-screen bg-black flex flex-col overflow-hidden">
-        {/* Compact Header with Title, Search, Filters, and New Task */}
-        <div className="flex-none px-6 py-4 border-b border-zinc-800/50">
+        {/* Mobile Header */}
+        <div className="md:hidden flex-none px-3 py-3 border-b border-zinc-800/50">
+          <div className="flex items-center justify-between mb-3">
+            <h1 className="text-xl font-bold text-white">Task Board</h1>
+            {(user?.role === 'Admin' || user?.role === 'Manager') && (
+              <button
+                onClick={() => setShowQuickTaskModal(true)}
+                className="btn-primary flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>New</span>
+              </button>
+            )}
+          </div>
+          
+          {/* Mobile Controls Row */}
+          <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
+            {/* View Toggle */}
+            <div className="flex items-center bg-zinc-900 border border-zinc-800 rounded-lg overflow-hidden flex-shrink-0">
+              <button
+                onClick={() => setViewMode('status')}
+                className={`px-2.5 py-1.5 text-xs font-medium transition-colors flex items-center gap-1.5 ${
+                  viewMode === 'status'
+                    ? 'bg-white text-black'
+                    : 'text-zinc-400 hover:text-white'
+                }`}
+              >
+                <LayoutGrid className="w-3.5 h-3.5" />
+                Status
+              </button>
+              <button
+                onClick={() => setViewMode('people')}
+                className={`px-2.5 py-1.5 text-xs font-medium transition-colors flex items-center gap-1.5 ${
+                  viewMode === 'people'
+                    ? 'bg-white text-black'
+                    : 'text-zinc-400 hover:text-white'
+                }`}
+              >
+                <Users className="w-3.5 h-3.5" />
+                People
+              </button>
+            </div>
+
+            {/* Search */}
+            <div className="flex items-center bg-zinc-900 border border-zinc-800 rounded-lg overflow-hidden flex-shrink-0 w-40">
+              <div className="p-2 text-zinc-400">
+                <Search className="w-3.5 h-3.5" />
+              </div>
+              <input
+                type="text"
+                placeholder="Search..."
+                className="w-full bg-transparent border-none text-white placeholder-zinc-500 focus:ring-0 text-xs outline-none pr-2"
+                value={searchInput}
+                onChange={handleSearchChange}
+              />
+            </div>
+
+            {/* Priority Filter */}
+            <select
+              className="bg-zinc-900 border border-zinc-800 text-zinc-300 text-xs rounded-lg px-2 py-1.5 focus:outline-none flex-shrink-0"
+              value={filters.priority}
+              onChange={(e) => handleFilterChange('priority', e.target.value)}
+            >
+              <option value="">Priority</option>
+              <option value="High">High</option>
+              <option value="Medium">Medium</option>
+              <option value="Low">Low</option>
+            </select>
+
+            {/* My Tasks */}
+            {(user?.role === 'Admin' || user?.role === 'Manager') && (
+              <button
+                onClick={() => handleFilterChange('myTasks', !filters.myTasks)}
+                className={`px-2.5 py-1.5 rounded-lg text-xs font-medium border transition-colors flex-shrink-0 ${
+                  filters.myTasks
+                    ? 'bg-white text-black border-white'
+                    : 'bg-zinc-900 text-zinc-400 border-zinc-800'
+                }`}
+              >
+                My Tasks
+              </button>
+            )}
+
+            {/* Clear */}
+            {(filters.search || filters.priority || filters.myTasks) && (
+              <button
+                onClick={clearFilters}
+                className="px-2 py-1.5 text-xs text-zinc-500 hover:text-white transition-colors flex-shrink-0"
+              >
+                Clear
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Desktop Header with Title, Search, Filters, and New Task */}
+        <div className="hidden md:block flex-none px-6 py-4 border-b border-zinc-800/50">
           <div className="flex items-center justify-between gap-4">
             {/* Left: Title */}
             <div className="flex-shrink-0">
@@ -413,7 +518,7 @@ const Tasks = () => {
 
         {/* Kanban Board - Full Height */}
         <div className="flex-1 overflow-hidden">
-          <div className="h-full flex gap-6 px-6 py-6 overflow-x-auto">
+          <div className="h-full flex gap-3 md:gap-6 px-3 md:px-6 py-3 md:py-6 overflow-x-auto scrollbar-hide">
             {viewMode === 'status' ? (
               // Status View
               ['Todo', 'In Progress', 'Completed', 'Expired'].map((status) => {
@@ -422,12 +527,12 @@ const Tasks = () => {
                 return (
                 <div 
                   key={status} 
-                  className="w-80 flex-shrink-0 flex flex-col bg-zinc-900/30 rounded-xl border border-zinc-800/50 backdrop-blur-sm h-full"
+                  className="w-[280px] md:w-80 flex-shrink-0 flex flex-col bg-zinc-900/30 rounded-xl border border-zinc-800/50 backdrop-blur-sm h-full"
                   onDragOver={handleDragOver}
                   onDrop={(e) => handleDrop(e, status)}
                 >
                   {/* Column Header */}
-                  <div className="p-4 border-b border-zinc-800/50 flex items-center justify-between bg-zinc-900/50 backdrop-blur-md rounded-t-xl">
+                  <div className="p-3 md:p-4 border-b border-zinc-800/50 flex items-center justify-between bg-zinc-900/50 backdrop-blur-md rounded-t-xl">
                     <div className="flex items-center gap-2">
                       <div className={`w-2 h-2 rounded-full ${
                         status === 'Todo' ? 'bg-zinc-500' :
@@ -435,17 +540,17 @@ const Tasks = () => {
                         status === 'Completed' ? 'bg-green-500' :
                         'bg-red-500'
                       }`} />
-                      <h3 className="font-semibold text-zinc-300 text-sm uppercase tracking-wider">
+                      <h3 className="font-semibold text-zinc-300 text-xs md:text-sm uppercase tracking-wider">
                         {status}
                       </h3>
-                      <span className="bg-zinc-800 text-zinc-400 text-xs px-2 py-0.5 rounded-full">
+                      <span className="bg-zinc-800 text-zinc-400 text-[10px] md:text-xs px-1.5 md:px-2 py-0.5 rounded-full">
                         {statusTasks.length}
                       </span>
                     </div>
                   </div>
 
                   {/* Tasks List */}
-                  <div className={`flex-1 p-3 space-y-3 ${statusTasks.length > 0 ? 'overflow-y-auto scrollbar-thin scrollbar-thumb-zinc-800 scrollbar-track-transparent' : 'overflow-hidden'}`}>
+                  <div className={`flex-1 p-2 md:p-3 space-y-2 md:space-y-3 ${statusTasks.length > 0 ? 'overflow-y-auto scrollbar-thin scrollbar-thumb-zinc-800 scrollbar-track-transparent' : 'overflow-hidden'}`}>
                     {statusTasks.map((task) => (
                       <div key={task._id} className="transform transition-transform duration-200 hover:-translate-y-1">
                         <TaskCard
@@ -462,9 +567,9 @@ const Tasks = () => {
                       </div>
                     ))}
                     {statusTasks.length === 0 && (
-                      <div className="h-full flex flex-col items-center justify-center text-zinc-600 text-sm border-2 border-dashed border-zinc-800/50 rounded-lg m-2 min-h-[100px]">
+                      <div className="h-full flex flex-col items-center justify-center text-zinc-600 text-xs md:text-sm border-2 border-dashed border-zinc-800/50 rounded-lg m-2 min-h-[80px] md:min-h-[100px]">
                         <p>No tasks</p>
-                        <p className="text-xs opacity-50">Drop here</p>
+                        <p className="text-[10px] md:text-xs opacity-50">Drop here</p>
                       </div>
                     )}
                   </div>
@@ -481,30 +586,30 @@ const Tasks = () => {
                 return (
                   <div 
                     key={member._id} 
-                    className="w-80 flex-shrink-0 flex flex-col bg-zinc-900/30 rounded-xl border border-zinc-800/50 backdrop-blur-sm h-full"
+                    className="w-[280px] md:w-80 flex-shrink-0 flex flex-col bg-zinc-900/30 rounded-xl border border-zinc-800/50 backdrop-blur-sm h-full"
                     onDragOver={handleDragOver}
                     onDrop={(e) => handleDropOnPerson(e, member._id)}
                   >
                     {/* Column Header */}
-                    <div className="p-4 border-b border-zinc-800/50 flex items-center justify-between bg-zinc-900/50 backdrop-blur-md rounded-t-xl">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-xs font-semibold">
+                    <div className="p-3 md:p-4 border-b border-zinc-800/50 flex items-center justify-between bg-zinc-900/50 backdrop-blur-md rounded-t-xl">
+                      <div className="flex items-center gap-2 md:gap-3">
+                        <div className="w-7 h-7 md:w-8 md:h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-[10px] md:text-xs font-semibold">
                           {member.firstName?.[0]}{member.lastName?.[0]}
                         </div>
                         <div>
-                          <h3 className="font-semibold text-zinc-300 text-sm">
+                          <h3 className="font-semibold text-zinc-300 text-xs md:text-sm">
                             {member.firstName} {member.lastName}
                           </h3>
-                          <p className="text-xs text-zinc-500">{member.role}</p>
+                          <p className="text-[10px] md:text-xs text-zinc-500">{member.role}</p>
                         </div>
                       </div>
-                      <span className="bg-zinc-800 text-zinc-400 text-xs px-2 py-0.5 rounded-full">
+                      <span className="bg-zinc-800 text-zinc-400 text-[10px] md:text-xs px-1.5 md:px-2 py-0.5 rounded-full">
                         {memberTasks.length}
                       </span>
                     </div>
 
                     {/* Tasks List */}
-                    <div className={`flex-1 p-3 space-y-3 ${memberTasks.length > 0 ? 'overflow-y-auto scrollbar-thin scrollbar-thumb-zinc-800 scrollbar-track-transparent' : 'overflow-hidden'}`}>
+                    <div className={`flex-1 p-2 md:p-3 space-y-2 md:space-y-3 ${memberTasks.length > 0 ? 'overflow-y-auto scrollbar-thin scrollbar-thumb-zinc-800 scrollbar-track-transparent' : 'overflow-hidden'}`}>
                       {memberTasks.map((task) => (
                         <div key={task._id} className="transform transition-transform duration-200 hover:-translate-y-1">
                           <TaskCard
@@ -521,9 +626,9 @@ const Tasks = () => {
                         </div>
                       ))}
                       {memberTasks.length === 0 && (
-                        <div className="h-full flex flex-col items-center justify-center text-zinc-600 text-sm border-2 border-dashed border-zinc-800/50 rounded-lg m-2 min-h-[100px]">
+                        <div className="h-full flex flex-col items-center justify-center text-zinc-600 text-xs md:text-sm border-2 border-dashed border-zinc-800/50 rounded-lg m-2 min-h-[80px] md:min-h-[100px]">
                           <p>No tasks</p>
-                          <p className="text-xs opacity-50">Drop here</p>
+                          <p className="text-[10px] md:text-xs opacity-50">Drop here</p>
                         </div>
                       )}
                     </div>
@@ -552,6 +657,7 @@ const Tasks = () => {
           setSelectedTask(null);
         }}
         task={selectedTask}
+        onEdit={(user?.role === 'Admin' || user?.role === 'Manager') ? handleTaskEdit : null}
       />
 
       {/* Task Edit Modal */}

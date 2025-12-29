@@ -14,7 +14,7 @@ import {
   X
 } from 'lucide-react';
 
-const Layout = ({ children, showNotification = false, showTopBar = true }) => {
+const Layout = ({ children, showNotification = false, showTopBar = true, onlineCount = null }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { user, logout } = useAuth();
   const location = useLocation();
@@ -149,43 +149,65 @@ const Layout = ({ children, showNotification = false, showTopBar = true }) => {
       <div className="flex flex-col w-0 flex-1 overflow-hidden bg-dark-900">
         {/* Top header - conditionally rendered */}
         {showTopBar && (
-          <div className="bg-dark-900 border-b border-dark-700/50 px-4 py-4">
+          <div className="bg-dark-900/50 backdrop-blur-sm px-4 py-3 relative z-50">
             <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <button
-                  className="md:hidden -ml-0.5 -mt-0.5 h-10 w-10 inline-flex items-center justify-center rounded-xl text-dark-400 hover:text-white hover:bg-dark-700/50 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary-500 transition-all duration-200"
-                  onClick={() => setSidebarOpen(true)}
-                >
-                  <Menu className="h-6 w-6" />
-                </button>
+              {/* Logo */}
+              <div className="flex items-center space-x-2">
+                <ClipboardList className="w-6 h-6 text-zinc-400" />
+                <h1 className="text-lg font-bold text-zinc-400 tracking-tight">
+                  TaskFlow
+                </h1>
               </div>
 
-              <div className="flex items-center space-x-4">
-                {showNotification && <NotificationDropdown />}
-
-                {/* User menu for mobile */}
-                <div className="md:hidden flex items-center space-x-3">
-                  <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center shadow-lg">
-                    <span className="text-sm font-bold text-white">
-                      {user?.firstName?.[0]}{user?.lastName?.[0]}
-                    </span>
+              {/* Right side - online count + notifications */}
+              <div className="flex items-center space-x-3">
+                {onlineCount !== null && (
+                  <div className="flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-green-500/10">
+                    <div className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></div>
+                    <span className="text-xs text-green-400 font-medium">{onlineCount} online</span>
                   </div>
-                  <button
-                    onClick={handleLogout}
-                    className="p-2 text-dark-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all duration-200 border border-transparent hover:border-red-500/20"
-                    title="Logout"
-                  >
-                    <LogOut className="h-4 w-4" />
-                  </button>
-                </div>
+                )}
+                {showNotification && <NotificationDropdown />}
               </div>
             </div>
           </div>
         )}
 
-        <main className="flex-1 relative z-0 overflow-y-auto focus:outline-none bg-dark-900">
+        <main className="flex-1 relative overflow-y-auto focus:outline-none bg-dark-900 pb-20 md:pb-0">
           {children}
         </main>
+
+        {/* Mobile Bottom Navigation */}
+        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-dark-800/95 backdrop-blur-xl border-t border-dark-700/50 z-50 safe-area-bottom">
+          <nav className="flex justify-around items-center h-16 px-2">
+            {navigation.map((item) => {
+              const isActive = location.pathname === item.href;
+              return (
+                <Link
+                  key={item.name}
+                  to={item.href}
+                  className={`flex flex-col items-center justify-center flex-1 py-2 px-1 rounded-xl transition-all duration-200 ${
+                    isActive
+                      ? 'text-primary-400'
+                      : 'text-dark-400 hover:text-dark-200'
+                  }`}
+                >
+                  <item.icon className={`h-5 w-5 ${isActive ? 'text-primary-400' : ''}`} />
+                  <span className={`text-xs mt-1 font-medium ${isActive ? 'text-primary-400' : ''}`}>
+                    {item.name}
+                  </span>
+                </Link>
+              );
+            })}
+            <button
+              onClick={handleLogout}
+              className="flex flex-col items-center justify-center flex-1 py-2 px-1 rounded-xl transition-all duration-200 text-dark-400 hover:text-red-400"
+            >
+              <LogOut className="h-5 w-5" />
+              <span className="text-xs mt-1 font-medium">Logout</span>
+            </button>
+          </nav>
+        </div>
       </div>
 
       {/* Connection Status Indicator */}

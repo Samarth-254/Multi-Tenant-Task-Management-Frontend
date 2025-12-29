@@ -45,21 +45,21 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-black py-12 px-4 sm:px-6 lg:px-8">
-      <div className="relative max-w-md w-full space-y-8">
+    <div className="min-h-screen flex items-center justify-center bg-black py-8 sm:py-12 px-4 sm:px-6 lg:px-8">
+      <div className="relative max-w-md w-full space-y-6 sm:space-y-8">
         <div className="text-center">
-          <div className="flex justify-center mb-6">
-            <div className="w-16 h-16 bg-zinc-900 border border-zinc-800 rounded-2xl flex items-center justify-center shadow-xl">
-              <LayoutDashboard className="w-8 h-8 text-white" />
+          <div className="flex justify-center mb-4 sm:mb-6">
+            <div className="w-12 h-12 sm:w-16 sm:h-16 bg-zinc-900 border border-zinc-800 rounded-xl sm:rounded-2xl flex items-center justify-center shadow-xl">
+              <LayoutDashboard className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
             </div>
           </div>
-          <h2 className="text-3xl font-bold text-white">
+          <h2 className="text-2xl sm:text-3xl font-bold text-white">
             Welcome back
           </h2>
-          <p className="mt-2 text-sm text-zinc-400">
+          <p className="mt-2 text-xs sm:text-sm text-zinc-400">
             Sign in to your TaskFlow account
           </p>
-          <p className="mt-4 text-sm text-zinc-400">
+          <p className="mt-3 sm:mt-4 text-xs sm:text-sm text-zinc-400">
             Don't have an account?{' '}
             <Link
               to="/register"
@@ -70,17 +70,17 @@ const Login = () => {
           </p>
         </div>
 
-        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8 shadow-xl">
-          <form className="space-y-6" onSubmit={handleSubmit}>
+        <div className="bg-zinc-900 border border-zinc-800 rounded-xl sm:rounded-2xl p-5 sm:p-8 shadow-xl">
+          <form className="space-y-5 sm:space-y-6" onSubmit={handleSubmit}>
             {error && (
-              <div className="bg-danger-500/10 border border-danger-500/20 text-danger-400 px-4 py-3 rounded-lg backdrop-blur-sm">
+              <div className="bg-danger-500/10 border border-danger-500/20 text-danger-400 px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg backdrop-blur-sm text-sm">
                 {error}
               </div>
             )}
 
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-dark-200 mb-2">
+                <label htmlFor="email" className="block text-xs sm:text-sm font-medium text-dark-200 mb-1.5 sm:mb-2">
                   Email address
                 </label>
                 <input
@@ -89,7 +89,7 @@ const Login = () => {
                   type="email"
                   autoComplete="email"
                   required
-                  className="input-dark w-full px-4 py-3"
+                  className="input-dark w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm"
                   placeholder="Enter your email"
                   value={formData.email}
                   onChange={handleChange}
@@ -97,7 +97,7 @@ const Login = () => {
               </div>
 
               <div>
-                <label htmlFor="password" className="block text-sm font-medium text-dark-200 mb-2">
+                <label htmlFor="password" className="block text-xs sm:text-sm font-medium text-dark-200 mb-1.5 sm:mb-2">
                   Password
                 </label>
                 <input
@@ -106,7 +106,7 @@ const Login = () => {
                   type="password"
                   autoComplete="current-password"
                   required
-                  className="input-dark w-full px-4 py-3"
+                  className="input-dark w-full px-3 sm:px-4 py-2.5 sm:py-3 text-sm"
                   placeholder="Enter your password"
                   value={formData.password}
                   onChange={handleChange}
@@ -115,7 +115,7 @@ const Login = () => {
             </div>
 
             <div className="flex items-center justify-between">
-              <div className="text-sm">
+              <div className="text-xs sm:text-sm">
                 <Link
                   to="/forgot-password"
                   className="font-medium text-zinc-400 hover:text-white transition-colors"
@@ -128,11 +128,11 @@ const Login = () => {
             <button
               type="submit"
               disabled={isLoading}
-              className="btn-primary w-full py-3 text-base font-medium disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+              className="btn-primary w-full py-2.5 sm:py-3 text-sm sm:text-base font-medium disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
             >
               {isLoading ? (
                 <div className="flex items-center justify-center">
-                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2"></div>
+                  <div className="w-4 h-4 sm:w-5 sm:h-5 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2"></div>
                   Signing in...
                 </div>
               ) : (

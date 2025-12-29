@@ -128,26 +128,26 @@ const NotificationDropdown = () => {
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="relative p-3 text-dark-200 hover:text-white hover:bg-dark-700 rounded-lg transition-colors bg-dark-800 border border-dark-600 shadow-lg"
+        className="relative p-2 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-lg transition-colors"
       >
-        <Bell className="h-6 w-6" />
+        <Bell className="h-5 w-5" />
         {unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 h-5 w-5 bg-danger-500 text-white text-xs rounded-full flex items-center justify-center">
+          <span className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-medium">
             {unreadCount > 9 ? '9+' : unreadCount}
           </span>
         )}
       </button>
 
       {isOpen && (
-        <div className="fixed right-4 top-16 w-80 bg-dark-800 border border-dark-600 rounded-xl shadow-2xl z-[99999] max-h-96 overflow-hidden">
-          <div className="p-4 border-b border-dark-700">
+        <div className="absolute right-0 top-full mt-2 w-80 bg-zinc-900 border border-zinc-700 rounded-xl shadow-2xl z-[99999] max-h-[70vh] overflow-hidden">
+          <div className="p-4 border-b border-zinc-800">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-dark-100">Notifications</h3>
+              <h3 className="text-lg font-semibold text-white">Notifications</h3>
               <div className="flex items-center space-x-2">
                 {unreadCount > 0 && (
                   <button
                     onClick={markAllAsRead}
-                    className="text-sm text-primary-400 hover:text-primary-300 transition-colors"
+                    className="text-sm text-blue-400 hover:text-blue-300 transition-colors"
                   >
                     Mark all read
                   </button>
@@ -155,7 +155,7 @@ const NotificationDropdown = () => {
                 {notifications.length > 0 && (
                   <button
                     onClick={clearAllNotifications}
-                    className="text-sm text-danger-400 hover:text-danger-300 transition-colors"
+                    className="text-sm text-red-400 hover:text-red-300 transition-colors"
                   >
                     Clear all
                   </button>
@@ -167,20 +167,20 @@ const NotificationDropdown = () => {
           <div className="max-h-80 overflow-y-auto">
             {loading ? (
               <div className="flex items-center justify-center p-8">
-                <div className="w-6 h-6 border-2 border-primary-500/30 border-t-primary-500 rounded-full animate-spin"></div>
+                <div className="w-6 h-6 border-2 border-blue-500/30 border-t-blue-500 rounded-full animate-spin"></div>
               </div>
             ) : notifications.length === 0 ? (
               <div className="text-center p-8">
-                <Bell className="h-12 w-12 text-dark-500 mx-auto mb-3" />
-                <p className="text-dark-400">No notifications yet</p>
+                <Bell className="h-12 w-12 text-zinc-600 mx-auto mb-3" />
+                <p className="text-zinc-500">No notifications yet</p>
               </div>
             ) : (
-              <div className="divide-y divide-dark-700">
+              <div className="divide-y divide-zinc-800">
                 {notifications.map((notification) => (
                   <div
                     key={notification._id}
-                    className={`p-4 hover:bg-dark-700/50 transition-colors ${
-                      !notification.isRead ? 'bg-primary-500/5 border-l-2 border-l-primary-500' : ''
+                    className={`p-4 hover:bg-zinc-800/50 transition-colors ${
+                      !notification.isRead ? 'bg-blue-500/5 border-l-2 border-l-blue-500' : ''
                     }`}
                   >
                     <div className="flex items-start space-x-3">
@@ -189,15 +189,15 @@ const NotificationDropdown = () => {
                       </div>
 
                       <div className="flex-1 min-w-0">
-                        <p className={`text-sm ${!notification.isRead ? 'font-medium text-dark-100' : 'text-dark-300'}`}>
+                        <p className={`text-sm ${!notification.isRead ? 'font-medium text-white' : 'text-zinc-300'}`}>
                           {notification.title}
                         </p>
                         {notification.message && (
-                          <p className="text-sm text-dark-400 mt-1">
+                          <p className="text-sm text-zinc-400 mt-1">
                             {notification.message}
                           </p>
                         )}
-                        <p className="text-xs text-dark-500 mt-2">
+                        <p className="text-xs text-zinc-500 mt-2">
                           {formatTimeAgo(notification.createdAt)}
                         </p>
                       </div>
@@ -206,7 +206,7 @@ const NotificationDropdown = () => {
                         {!notification.isRead && (
                           <button
                             onClick={() => markAsRead(notification._id)}
-                            className="p-1 text-primary-400 hover:text-primary-300 transition-colors"
+                            className="p-1 text-blue-400 hover:text-blue-300 transition-colors"
                             title="Mark as read"
                           >
                             <Check className="h-4 w-4" />
@@ -214,7 +214,7 @@ const NotificationDropdown = () => {
                         )}
                         <button
                           onClick={() => deleteNotification(notification._id)}
-                          className="p-1 text-dark-500 hover:text-danger-400 transition-colors"
+                          className="p-1 text-zinc-500 hover:text-red-400 transition-colors"
                           title="Delete notification"
                         >
                           <X className="h-4 w-4" />
@@ -228,8 +228,8 @@ const NotificationDropdown = () => {
           </div>
 
           {notifications.length > 0 && (
-            <div className="p-3 border-t border-dark-700 text-center">
-              <button className="text-sm text-primary-400 hover:text-primary-300 transition-colors">
+            <div className="p-3 border-t border-zinc-800 text-center">
+              <button className="text-sm text-blue-400 hover:text-blue-300 transition-colors">
                 View all notifications
               </button>
             </div>

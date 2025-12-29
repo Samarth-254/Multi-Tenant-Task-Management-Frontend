@@ -27,14 +27,8 @@ const ConnectionStatus = () => {
     );
   }
 
-  return (
-    <div className="fixed bottom-4 right-4 z-50">
-      <div className="bg-green-500/10 border border-green-500/20 text-green-400 px-4 py-2 rounded-lg backdrop-blur-sm flex items-center space-x-2">
-        <Wifi className="w-4 h-4" />
-        <span className="text-sm">Real-time Connected</span>
-      </div>
-    </div>
-  );
+  // Don't show anything when connected - it's expected state
+  return null;
 };
 
 export default ConnectionStatus;
