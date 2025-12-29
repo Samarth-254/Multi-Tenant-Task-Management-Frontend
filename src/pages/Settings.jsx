@@ -44,7 +44,7 @@ const Settings = () => {
     dailyDigest: {
       enabled: false,
       time: '09:00',
-      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+      timezone: 'Asia/Kolkata' // IST timezone
     },
     taskReminders: {
       enabled: true,
@@ -81,7 +81,7 @@ const Settings = () => {
           dailyDigest: {
             enabled: userData.emailNotifications.dailyDigest?.enabled ?? false,
             time: userData.emailNotifications.dailyDigest?.time || '09:00',
-            timezone: userData.emailNotifications.dailyDigest?.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone
+            timezone: 'Asia/Kolkata' // Always use IST
           },
           taskReminders: {
             enabled: userData.emailNotifications.taskReminders?.enabled ?? true,
@@ -475,7 +475,7 @@ const Settings = () => {
                               })}
                             />
                             <p className="text-xs text-zinc-500 mt-1">
-                              Timezone: {emailPreferences.dailyDigest.timezone}
+                              Timezone: IST (Indian Standard Time)
                             </p>
                           </div>
                         </div>
