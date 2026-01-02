@@ -3,6 +3,7 @@ import { toast } from 'react-toastify';
 import { X, Plus, Calendar, User, Flag, Zap } from 'lucide-react';
 import { tasksAPI, organizationsAPI } from '../utils/api';
 import { useAuth } from '../context/AuthContext';
+import RichTextEditor from './RichTextEditor';
 
 const QuickTaskModal = ({ isOpen, onClose, onTaskCreated }) => {
   const { user } = useAuth();
@@ -32,9 +33,7 @@ const QuickTaskModal = ({ isOpen, onClose, onTaskCreated }) => {
 
   const fetchUsers = async () => {
     try {
-      console.log('Fetching users...');
       const response = await organizationsAPI.getUsers();
-      console.log('Users response:', response.data);
       // Filter to only show active users
       const activeUsers = response.data.users || [];
       setUsers(activeUsers);
@@ -136,13 +135,10 @@ const QuickTaskModal = ({ isOpen, onClose, onTaskCreated }) => {
             <label className="block text-xs sm:text-sm font-medium text-zinc-300 mb-1.5 sm:mb-2">
               Description
             </label>
-            <textarea
-              name="description"
-              rows="2"
-              className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-zinc-800 border border-zinc-700 text-white placeholder-zinc-500 rounded-lg focus:outline-none focus:border-zinc-600 transition-colors resize-none text-sm"
-              placeholder="Enter task description..."
+            <RichTextEditor
               value={formData.description}
-              onChange={handleChange}
+              onChange={(value) => setFormData(prev => ({ ...prev, description: value }))}
+              placeholder="Enter task description with formatting..."
             />
           </div>
 

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import { X, Calendar, User, Flag, Clock, Save } from 'lucide-react';
 import { organizationsAPI } from '../utils/api';
+import RichTextEditor from './RichTextEditor';
 
 const TaskEditModal = ({ isOpen, onClose, task, onSave, userRole }) => {
   const [formData, setFormData] = useState({
@@ -149,13 +150,11 @@ const TaskEditModal = ({ isOpen, onClose, task, onSave, userRole }) => {
             <label className="block text-sm font-medium text-zinc-300 mb-2">
               Description
             </label>
-            <textarea
-              name="description"
+            <RichTextEditor
               value={formData.description}
-              onChange={handleInputChange}
-              disabled={canOnlyEditStatus}
-              rows={4}
-              className="w-full px-4 py-2 bg-zinc-800 border border-zinc-700 text-white placeholder-zinc-500 rounded-lg focus:outline-none focus:border-zinc-600 transition-colors resize-none"
+              onChange={(value) => setFormData(prev => ({ ...prev, description: value }))}
+              placeholder="Enter task description with formatting..."
+              readOnly={canOnlyEditStatus}
             />
           </div>
 

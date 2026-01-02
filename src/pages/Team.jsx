@@ -3,10 +3,11 @@ import { toast } from 'react-toastify';
 import Layout from '../components/Layout';
 import InviteModal from '../components/InviteModal';
 import TaskReassignmentModal from '../components/TaskReassignmentModal';
-import { organizationsAPI, invitationsAPI } from '../utils/api';
+import TeamMemberEditModal from '../components/TeamMemberEditModal';
+import { organizationsAPI, invitationsAPI, usersAPI } from '../utils/api';
 import { useAuth } from '../context/AuthContext';
 import { useSocket } from '../context/SocketContext';
-import { UserPlus, Mail, Shield, Users, Crown, Trash2, Search } from 'lucide-react';
+import { UserPlus, Mail, Shield, Users, Crown, Trash2, Search, Settings } from 'lucide-react';
 
 const Team = () => {
   const [users, setUsers] = useState([]);
@@ -20,6 +21,7 @@ const Team = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState('');
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
+  const [editingMember, setEditingMember] = useState(null);
   const { user } = useAuth();
   const { socketService, onlineUsers, isConnected } = useSocket();
 
@@ -101,6 +103,23 @@ const Team = () => {
         toast.error(errorMsg);
       }
     }
+  };
+
+  const canEditRole = (member) => {
+    // Member cannot edit any roles
+    if (user?.role === 'Member') return false;
+    
+    // Manager can edit Member roles only (not their own, not Admins)
+    if (user?.role === 'Manager') {
+      return member.role === 'Member' && member._id !== user._id;
+    }
+    
+    // Admin can edit anyone's role including their own
+    if (user?.role === 'Admin') {
+      return true;
+    }
+    
+    return false;
   };
 
   const getRoleColor = (role) => {
@@ -411,10 +430,20 @@ const Team = () => {
                       <div className="flex items-center gap-3 md:gap-4">
                         {/* Avatar */}
                         <div className="relative flex-shrink-0">
-                          <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-zinc-700 flex items-center justify-center">
-                            <span className="text-xs md:text-sm font-semibold text-white">
-                              {member.firstName?.[0]}{member.lastName?.[0]}
-                            </span>
+                          <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl overflow-hidden">
+                            {member.profilePicture ? (
+                              <img 
+                                src={member.profilePicture} 
+                                alt={`${member.firstName} ${member.lastName}`}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <div className="w-full h-full bg-zinc-700 flex items-center justify-center">
+                                <span className="text-xs md:text-sm font-semibold text-white">
+                                  {member.firstName?.[0]}{member.lastName?.[0]}
+                                </span>
+                              </div>
+                            )}
                           </div>
                           <div className={`absolute -bottom-0.5 -right-0.5 md:-bottom-1 md:-right-1 w-3 h-3 md:w-4 md:h-4 rounded-full border-2 border-zinc-800 ${
                             isUserOnline(member._id) ? 'bg-emerald-400' :
@@ -428,7 +457,8 @@ const Team = () => {
                             <h3 className="font-semibold text-white text-sm md:text-base truncate">
                               {member.firstName} {member.lastName}
                             </h3>
-                            <span className="hidden sm:inline-flex">{getRoleIcon(member.role)}</span>
+                            
+                            {/* Role Badge */}
                             <span className={`inline-flex items-center px-1.5 md:px-2 py-0.5 rounded text-[10px] md:text-xs font-medium border ${getRoleColor(member.role)}`}>
                               {member.role}
                             </span>
@@ -436,30 +466,20 @@ const Team = () => {
                           <p className="text-zinc-400 truncate text-xs md:text-sm">
                             {member.email}
                           </p>
-                          {member.department && (
-                            <p className="text-[10px] md:text-xs text-zinc-500 truncate mt-0.5">
-                              {member.department}
-                            </p>
-                          )}
                         </div>
 
-                        {/* Status & Actions */}
-                        <div className="hidden sm:flex items-center gap-3 md:gap-4 flex-shrink-0">
-                          {/* Status */}
-                          <div className={`inline-flex items-center gap-1 md:gap-1.5 px-2 md:px-2.5 py-0.5 md:py-1 rounded-lg text-[10px] md:text-xs font-medium ${
-                            isUserOnline(member._id)
-                              ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                              : member.isActive
-                                ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
-                                : 'bg-zinc-500/10 text-zinc-400 border border-zinc-500/20'
-                          }`}>
-                            <div className={`w-1.5 h-1.5 rounded-full ${
-                              isUserOnline(member._id) ? 'bg-emerald-400' :
-                              member.isActive ? 'bg-amber-400' : 'bg-zinc-500'
-                            }`}></div>
-                            {isUserOnline(member._id) ? 'Online' :
-                             member.isActive ? 'Offline' : 'Inactive'}
-                          </div>
+                        {/* Actions */}
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          {/* Edit Role Action */}
+                          {canEditRole(member) && (
+                            <button
+                              onClick={() => setEditingMember(member)}
+                              className="p-2 text-zinc-500 hover:text-blue-400 hover:bg-blue-500/10 rounded-lg transition-all duration-200"
+                              title="Edit member details"
+                            >
+                              <Settings className="w-4 h-4" />
+                            </button>
+                          )}
 
                           {/* Delete Action */}
                           {(user?.role === 'Admin' || (user?.role === 'Manager' && member.role === 'Member')) && member._id !== user._id && (
@@ -497,6 +517,13 @@ const Team = () => {
         userId={userToDelete?.id}
         userName={userToDelete?.name}
         onReassign={handleConfirmDelete}
+      />
+
+      <TeamMemberEditModal
+        isOpen={!!editingMember}
+        onClose={() => setEditingMember(null)}
+        member={editingMember}
+        onUpdate={fetchTeamData}
       />
     </Layout>
   );

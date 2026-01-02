@@ -14,10 +14,11 @@ import {
   Circle,
   Play,
   AlertTriangle,
-  Edit
+  Edit,
+  Trash2
 } from 'lucide-react';
 
-const TaskDetailModal = ({ isOpen, onClose, task, onEdit }) => {
+const TaskDetailModal = ({ isOpen, onClose, task, onEdit, onDelete }) => {
   if (!isOpen || !task) return null;
 
   const getPriorityColor = (priority) => {
@@ -63,23 +64,37 @@ const TaskDetailModal = ({ isOpen, onClose, task, onEdit }) => {
         <div className="flex flex-col sm:flex-row overflow-y-auto max-h-[calc(90vh-60px)]">
           {/* Left Column - Main Content */}
           <div className="flex-1 p-4 sm:p-6 space-y-4 sm:space-y-6">
-            {/* Title with Edit button */}
+            {/* Title with Edit and Delete buttons */}
             <div className="flex items-start justify-between gap-3">
               <h1 className="text-xl sm:text-3xl font-bold text-white leading-tight flex-1">
                 {task.title}
               </h1>
-              {onEdit && (
-                <button
-                  onClick={() => {
-                    onClose();
-                    onEdit(task);
-                  }}
-                  className="p-2 hover:bg-zinc-800 rounded-lg transition-colors text-zinc-400 hover:text-blue-400 flex-shrink-0"
-                  title="Edit task"
-                >
-                  <Edit className="w-5 h-5" />
-                </button>
-              )}
+              <div className="flex items-center gap-2 flex-shrink-0">
+                {onEdit && (
+                  <button
+                    onClick={() => {
+                      onClose();
+                      onEdit(task);
+                    }}
+                    className="p-1.5 hover:bg-zinc-800 rounded-lg transition-colors text-zinc-400 hover:text-blue-400"
+                    title="Edit task"
+                  >
+                    <Edit className="w-4 h-4" />
+                  </button>
+                )}
+                {onDelete && (
+                  <button
+                    onClick={() => {
+                      onDelete(task._id);
+                      onClose();
+                    }}
+                    className="p-1.5 hover:bg-zinc-800 rounded-lg transition-colors text-zinc-400 hover:text-red-400"
+                    title="Delete task"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
             </div>
 
             {/* Badges */}
@@ -102,9 +117,10 @@ const TaskDetailModal = ({ isOpen, onClose, task, onEdit }) => {
             {/* Description */}
             <div>
               <h3 className="text-xs sm:text-sm font-semibold text-zinc-400 mb-2 sm:mb-3">Description</h3>
-              <p className="text-zinc-300 leading-relaxed text-sm sm:text-base">
-                {task.description}
-              </p>
+              <div 
+                className="text-zinc-300 leading-relaxed text-sm sm:text-base prose prose-invert max-w-none"
+                dangerouslySetInnerHTML={{ __html: task.description }}
+              />
             </div>
           </div>
 

@@ -44,14 +44,12 @@ class SocketService {
     if (!this.socket) return;
 
     this.socket.on('connect', () => {
-      console.log('✅ Connected to WebSocket server');
       this.isConnected = true;
       this.reconnectAttempts = 0;
       this.emit('connection_status', { connected: true });
     });
 
     this.socket.on('disconnect', (reason) => {
-      console.log('❌ Disconnected from WebSocket server:', reason);
       this.isConnected = false;
       this.emit('connection_status', { connected: false, reason });
     });
@@ -116,7 +114,6 @@ class SocketService {
 
   disconnect() {
     if (this.socket) {
-      console.log('🔌 Disconnecting from WebSocket server');
       this.socket.disconnect();
       this.socket = null;
       this.isConnected = false;

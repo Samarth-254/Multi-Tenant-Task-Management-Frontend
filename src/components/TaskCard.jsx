@@ -99,7 +99,7 @@ const TaskCard = ({ task, onUpdate, onDelete, onView, onEdit, userRole, currentU
       {/* Description */}
       {task.description && (
         <p className="text-zinc-400 text-[10px] md:text-xs leading-relaxed mb-3 md:mb-4 line-clamp-2">
-          {task.description}
+          {task.description.replace(/<[^>]*>/g, '').substring(0, 100)}
         </p>
       )}
 

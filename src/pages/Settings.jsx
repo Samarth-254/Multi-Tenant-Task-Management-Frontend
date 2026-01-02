@@ -15,9 +15,10 @@ import {
 import Layout from '../components/Layout';
 import { useAuth } from '../context/AuthContext';
 import { usersAPI } from '../utils/api';
+import AvatarSelector from '../components/AvatarSelector';
 
 const Settings = () => {
-  const { user, updateUser } = useAuth();
+  const { user, updateUser, refreshUser } = useAuth();
   const [loading, setLoading] = useState(false);
   const [fetchingData, setFetchingData] = useState(true);
   const [activeTab, setActiveTab] = useState('profile');
@@ -28,7 +29,7 @@ const Settings = () => {
     lastName: '',
     email: '',
     phoneNumber: '',
-    department: ''
+    profilePicture: ''
   });
 
   // Password change
@@ -61,6 +62,20 @@ const Settings = () => {
     fetchUserProfile();
   }, []);
 
+  // Sync profileData with user context when user changes
+  useEffect(() => {
+    if (user) {
+      setProfileData(prev => ({
+        ...prev,
+        firstName: user.firstName || '',
+        lastName: user.lastName || '',
+        email: user.email || '',
+        phoneNumber: user.phoneNumber || '',
+        profilePicture: user.profilePicture || ''
+      }));
+    }
+  }, [user]);
+
   const fetchUserProfile = async () => {
     try {
       setFetchingData(true);
@@ -72,7 +87,7 @@ const Settings = () => {
         lastName: userData.lastName || '',
         email: userData.email || '',
         phoneNumber: userData.phoneNumber || '',
-        department: userData.department || ''
+        profilePicture: userData.profilePicture || ''
       });
 
       if (userData.emailNotifications) {
@@ -106,8 +121,20 @@ const Settings = () => {
     setLoading(true);
 
     try {
-      const response = await usersAPI.updateProfile(profileData);
+      const updateData = {
+        firstName: profileData.firstName,
+        lastName: profileData.lastName,
+        phoneNumber: profileData.phoneNumber,
+        profilePicture: profileData.profilePicture
+      };
+      const response = await usersAPI.updateProfile(updateData);
+      
+      // Update user in context
       updateUser(response.data.user);
+      
+      // Force refresh from server
+      await refreshUser();
+      
       toast.success('Profile updated successfully!');
     } catch (error) {
       console.error('Profile update error:', error);
@@ -176,150 +203,176 @@ const Settings = () => {
   return (
     <Layout showTopBar={false}>
       <div className="min-h-screen bg-black">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {/* Header */}
-          <div className="mb-8">
-            <div className="flex items-center mb-4">
-              <SettingsIcon className="w-8 h-8 text-white mr-3" />
-              <h1 className="text-3xl font-bold text-white">Settings</h1>
-            </div>
-            <p className="text-zinc-400">Manage your account preferences and settings</p>
+        <div className="flex flex-col md:flex-row">
+          {/* Mobile Tab Selector */}
+          <div className="md:hidden border-b border-zinc-800 p-4">
+            <select
+              value={activeTab}
+              onChange={(e) => setActiveTab(e.target.value)}
+              className="w-full px-4 py-2 bg-zinc-800 border border-zinc-700 text-white rounded-lg focus:outline-none focus:border-blue-500"
+            >
+              <option value="profile">Profile details</option>
+              <option value="password">Password</option>
+              <option value="notifications">Email Notifications</option>
+            </select>
           </div>
 
-          {/* Loading State */}
-          {fetchingData ? (
-            <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-12">
-              <div className="flex flex-col items-center justify-center">
+          {/* Desktop Left Sidebar Navigation */}
+          <div className="hidden md:block md:w-64 border-r border-zinc-800 min-h-screen p-6">
+            <div className="space-y-2">
+              <button
+                onClick={() => setActiveTab('profile')}
+                className={`w-full text-left px-4 py-3 rounded-lg transition-all ${
+                  activeTab === 'profile'
+                    ? 'bg-zinc-800 text-white font-medium'
+                    : 'text-zinc-400 hover:text-white hover:bg-zinc-800/50'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <User className="w-5 h-5" />
+                  <span>Profile details</span>
+                </div>
+              </button>
+              <button
+                onClick={() => setActiveTab('password')}
+                className={`w-full text-left px-4 py-3 rounded-lg transition-all ${
+                  activeTab === 'password'
+                    ? 'bg-zinc-800 text-white font-medium'
+                    : 'text-zinc-400 hover:text-white hover:bg-zinc-800/50'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <Lock className="w-5 h-5" />
+                  <span>Password</span>
+                </div>
+              </button>
+              <button
+                onClick={() => setActiveTab('notifications')}
+                className={`w-full text-left px-4 py-3 rounded-lg transition-all ${
+                  activeTab === 'notifications'
+                    ? 'bg-zinc-800 text-white font-medium'
+                    : 'text-zinc-400 hover:text-white hover:bg-zinc-800/50'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <Bell className="w-5 h-5" />
+                  <span>Email Notifications</span>
+                </div>
+              </button>
+            </div>
+          </div>
+
+          {/* Main Content Area */}
+          <div className="flex-1 p-4 md:p-8">
+            {fetchingData ? (
+              <div className="flex flex-col items-center justify-center py-20">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mb-4"></div>
                 <p className="text-zinc-400">Loading settings...</p>
               </div>
-            </div>
-          ) : (
-            <>
-              {/* Tabs */}
-              <div className="flex space-x-1 mb-8 bg-zinc-900 p-1 rounded-lg border border-zinc-800">
-                {tabs.map((tab) => {
-                  const Icon = tab.icon;
-                  return (
-                    <button
-                      key={tab.id}
-                      onClick={() => setActiveTab(tab.id)}
-                      className={`flex-1 flex items-center justify-center space-x-2 px-4 py-3 rounded-lg transition-all ${
-                        activeTab === tab.id
-                          ? 'bg-white text-black font-medium'
-                          : 'text-zinc-400 hover:text-white'
-                      }`}
-                    >
-                      <Icon className="w-4 h-4" />
-                      <span className="hidden sm:inline">{tab.label}</span>
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* Content */}
-              <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+            ) : (
+              <div className="max-w-4xl">
             {/* Profile Tab */}
             {activeTab === 'profile' && (
-              <form onSubmit={handleProfileUpdate} className="space-y-6">
+              <form onSubmit={handleProfileUpdate} className="space-y-8">
+                {/* Profile Photo Section */}
                 <div>
-                  <h2 className="text-xl font-semibold text-white mb-4">Profile Information</h2>
-                  <p className="text-zinc-400 text-sm mb-6">Update your personal information</p>
+                  <h2 className="text-xl md:text-2xl font-bold text-white mb-4 md:mb-6">Profile Photo</h2>
+                  <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 md:p-8">
+                    <AvatarSelector
+                      currentAvatar={profileData.profilePicture}
+                      onSelect={(avatarUrl) => setProfileData({ ...profileData, profilePicture: avatarUrl })}
+                    />
+                  </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-sm font-medium text-zinc-300 mb-2">
-                      First Name *
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      className="w-full px-4 py-2 bg-zinc-800 border border-zinc-700 text-white placeholder-zinc-500 rounded-lg focus:outline-none focus:border-zinc-600 transition-colors"
-                      value={profileData.firstName}
-                      onChange={(e) => setProfileData({ ...profileData, firstName: e.target.value })}
-                    />
-                  </div>
+                {/* Personal Details Section */}
+                <div>
+                  <h2 className="text-xl md:text-2xl font-bold text-white mb-4 md:mb-6">Personal details</h2>
+                  <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 md:p-8 space-y-6">
+                    {/* Row 1: Name and Email */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div>
+                        <label className="block text-sm text-zinc-400 mb-2">
+                          Name
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 text-white placeholder-zinc-500 rounded-lg focus:outline-none focus:border-blue-500 transition-colors"
+                          value={`${profileData.firstName} ${profileData.lastName}`}
+                          onChange={(e) => {
+                            const names = e.target.value.split(' ');
+                            setProfileData({ 
+                              ...profileData, 
+                              firstName: names[0] || '',
+                              lastName: names.slice(1).join(' ') || ''
+                            });
+                          }}
+                        />
+                      </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-zinc-300 mb-2">
-                      Last Name *
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      className="w-full px-4 py-2 bg-zinc-800 border border-zinc-700 text-white placeholder-zinc-500 rounded-lg focus:outline-none focus:border-zinc-600 transition-colors"
-                      value={profileData.lastName}
-                      onChange={(e) => setProfileData({ ...profileData, lastName: e.target.value })}
-                    />
-                  </div>
+                      <div>
+                        <label className="block text-sm text-zinc-400 mb-2">
+                          Email ID
+                        </label>
+                        <input
+                          type="email"
+                          disabled
+                          className="w-full px-4 py-3 bg-zinc-800/50 border border-zinc-700 text-zinc-400 rounded-lg cursor-not-allowed"
+                          value={profileData.email}
+                        />
+                      </div>
+                    </div>
 
-                  <div className="md:col-span-2">
-                    <label className="block text-sm font-medium text-zinc-300 mb-2">
-                      Email
-                    </label>
-                    <input
-                      type="email"
-                      disabled
-                      className="w-full px-4 py-2 bg-zinc-800/50 border border-zinc-700 text-zinc-500 rounded-lg cursor-not-allowed"
-                      value={profileData.email}
-                    />
-                    <p className="text-xs text-zinc-500 mt-1">Email cannot be changed</p>
-                  </div>
+                    {/* Row 2: Mobile Number and Role */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div>
+                        <label className="block text-sm text-zinc-400 mb-2">
+                          Mobile Number
+                        </label>
+                        <div className="flex gap-2">
+                          <div className="w-20 px-3 py-3 bg-zinc-800 border border-zinc-700 text-white rounded-lg flex items-center justify-center">
+                            +91
+                          </div>
+                          <input
+                            type="tel"
+                            className="flex-1 px-4 py-3 bg-zinc-800 border border-zinc-700 text-white placeholder-zinc-500 rounded-lg focus:outline-none focus:border-blue-500 transition-colors"
+                            placeholder="98765 43210"
+                            maxLength="10"
+                            pattern="[0-9]{10}"
+                            value={profileData.phoneNumber}
+                            onChange={(e) => {
+                              const value = e.target.value.replace(/\D/g, '');
+                              setProfileData({ ...profileData, phoneNumber: value });
+                            }}
+                          />
+                        </div>
+                      </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-zinc-300 mb-2">
-                      Phone Number
-                    </label>
-                    <input
-                      type="tel"
-                      className="w-full px-4 py-2 bg-zinc-800 border border-zinc-700 text-white placeholder-zinc-500 rounded-lg focus:outline-none focus:border-zinc-600 transition-colors"
-                      placeholder="+1 (555) 000-0000"
-                      value={profileData.phoneNumber}
-                      onChange={(e) => setProfileData({ ...profileData, phoneNumber: e.target.value })}
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-zinc-300 mb-2">
-                      Department
-                    </label>
-                    <input
-                      type="text"
-                      className="w-full px-4 py-2 bg-zinc-800 border border-zinc-700 text-white placeholder-zinc-500 rounded-lg focus:outline-none focus:border-zinc-600 transition-colors"
-                      placeholder="Engineering"
-                      value={profileData.department}
-                      onChange={(e) => setProfileData({ ...profileData, department: e.target.value })}
-                    />
-                  </div>
-
-                  <div className="md:col-span-2">
-                    <div className="bg-zinc-800/50 border border-zinc-700 rounded-lg p-4">
-                      <div className="flex items-start">
-                        <Info className="w-5 h-5 text-blue-400 mr-3 flex-shrink-0 mt-0.5" />
-                        <div>
-                          <p className="text-sm text-zinc-300 font-medium mb-1">Role Information</p>
-                          <p className="text-sm text-zinc-400">
-                            Current Role: <span className="text-white font-medium">{user?.role}</span>
-                          </p>
-                          <p className="text-xs text-zinc-500 mt-1">
-                            Contact an administrator to change your role
-                          </p>
+                      <div>
+                        <label className="block text-sm text-zinc-400 mb-2">
+                          Role
+                        </label>
+                        <div className="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-lg flex items-center">
+                          <span className="px-3 py-1 bg-blue-500/10 text-blue-400 rounded text-sm font-medium border border-blue-500/20">
+                            {user?.role}
+                          </span>
                         </div>
                       </div>
                     </div>
-                  </div>
-                </div>
 
-                <div className="flex justify-end pt-4 border-t border-zinc-800">
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="btn-primary flex items-center space-x-2"
-                  >
-                    <Save className="w-4 h-4" />
-                    <span>{loading ? 'Saving...' : 'Save Changes'}</span>
-                  </button>
+                    {/* Save Button */}
+                    <div className="flex justify-end pt-4">
+                      <button
+                        type="submit"
+                        disabled={loading}
+                        className="w-full md:w-auto px-6 md:px-8 py-2.5 md:py-3 bg-white hover:bg-gray-100 disabled:bg-gray-300 text-black rounded-lg transition-colors font-medium flex items-center justify-center gap-2"
+                      >
+                        <Save className="w-4 h-4" />
+                        {loading ? 'Saving...' : 'Save Changes'}
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </form>
             )}
@@ -328,11 +381,11 @@ const Settings = () => {
             {activeTab === 'password' && (
               <form onSubmit={handlePasswordChange} className="space-y-6">
                 <div>
-                  <h2 className="text-xl font-semibold text-white mb-4">Change Password</h2>
-                  <p className="text-zinc-400 text-sm mb-6">Update your password to keep your account secure</p>
+                  <h2 className="text-xl md:text-2xl font-bold text-white mb-2 md:mb-4">Change Password</h2>
+                  <p className="text-zinc-400 text-sm mb-4 md:mb-6">Update your password to keep your account secure</p>
                 </div>
 
-                <div className="space-y-4">
+                <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 md:p-8 space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-zinc-300 mb-2">
                       Current Password *
@@ -393,7 +446,7 @@ const Settings = () => {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="btn-primary flex items-center space-x-2"
+                    className="btn-primary flex items-center justify-center space-x-2 w-full md:w-auto"
                   >
                     <Lock className="w-4 h-4" />
                     <span>{loading ? 'Changing...' : 'Change Password'}</span>
@@ -588,9 +641,9 @@ const Settings = () => {
                 </div>
               </div>
             )}
+              </div>
+            )}
           </div>
-            </>
-          )}
         </div>
       </div>
     </Layout>

@@ -58,6 +58,7 @@ const Dashboard = () => {
   });
   const [recentTasks, setRecentTasks] = useState([]);
   const [allTasks, setAllTasks] = useState([]);
+  const [allOrgTasks, setAllOrgTasks] = useState([]); // For top performers calculation
   const [teamMembers, setTeamMembers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [chartData, setChartData] = useState({
@@ -75,11 +76,17 @@ const Dashboard = () => {
     try {
       setLoading(true);
       
-      // Fetch all tasks for comprehensive analytics
-      const tasksResponse = await tasksAPI.getTasks({ limit: 1000 });
+      // Fetch tasks - All users see only their own tasks for stats
+      const queryParams = { limit: 1000, assignedTo: user._id };
+      const tasksResponse = await tasksAPI.getTasks(queryParams);
       const tasks = tasksResponse.data.tasks || [];
       setAllTasks(tasks);
-      setRecentTasks(tasks.slice(0, 3));
+      setRecentTasks(tasks.slice(0, 5));
+
+      // Fetch ALL organization tasks for top performers (visible to everyone)
+      const allTasksResponse = await tasksAPI.getTasks({ limit: 1000, forStats: true });
+      const orgTasks = allTasksResponse.data.tasks || [];
+      setAllOrgTasks(orgTasks);
 
       // Fetch team members
       try {
@@ -244,10 +251,10 @@ const Dashboard = () => {
     return null;
   };
 
-  // Get top performers
+  // Get top performers - visible to all users
   const topPerformers = teamMembers
     .map(member => {
-      const memberTasks = allTasks.filter(t => 
+      const memberTasks = allOrgTasks.filter(t => 
         (t.assignedTo?._id === member._id || t.assignedTo?.id === member._id) &&
         t.status === 'Completed'
       );
@@ -264,12 +271,12 @@ const Dashboard = () => {
       <div className="min-h-screen bg-black">
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8">
           {/* Header Section */}
-          <div className="mb-6 sm:mb-8">
-            <div className="flex flex-col gap-2">
-              <h1 className="text-2xl sm:text-4xl font-bold text-white">
+          <div className="mb-4 sm:mb-6">
+            <div className="flex flex-col gap-1">
+              <h1 className="text-xl sm:text-3xl font-bold text-white">
                 {getGreeting()}, {user?.firstName}! 👋
               </h1>
-              <p className="text-zinc-400 text-sm sm:text-lg">
+              <p className="text-zinc-400 text-xs sm:text-base">
                 Here's your productivity overview
               </p>
             </div>
@@ -615,11 +622,17 @@ const Dashboard = () => {
                 <h2 className="text-base sm:text-lg font-semibold text-white mb-3 sm:mb-4">Your Profile</h2>
                 <div className="space-y-3 sm:space-y-4">
                   <div className="flex items-center">
-                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-zinc-700 rounded-xl flex items-center justify-center mr-2.5 sm:mr-3">
-                      <span className="text-base sm:text-lg font-bold text-white">
-                        {user?.firstName?.[0]}{user?.lastName?.[0]}
-                      </span>
-                    </div>
+                    {user?.profilePicture ? (
+                      <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl overflow-hidden mr-2.5 sm:mr-3">
+                        <img src={user.profilePicture} alt={`${user.firstName} ${user.lastName}`} className="w-full h-full object-cover" />
+                      </div>
+                    ) : (
+                      <div className="w-10 h-10 sm:w-12 sm:h-12 bg-zinc-700 rounded-xl flex items-center justify-center mr-2.5 sm:mr-3">
+                        <span className="text-base sm:text-lg font-bold text-white">
+                          {user?.firstName?.[0]}{user?.lastName?.[0]}
+                        </span>
+                      </div>
+                    )}
                     <div className="min-w-0 flex-1">
                       <p className="text-white font-medium text-sm sm:text-base truncate">{user?.firstName} {user?.lastName}</p>
                       <p className="text-zinc-400 text-xs sm:text-sm truncate">{user?.email}</p>

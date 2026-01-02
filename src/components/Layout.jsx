@@ -23,11 +23,8 @@ const Layout = ({ children, showNotification = false, showTopBar = true, onlineC
     { name: 'Dashboard', href: '/dashboard', icon: Home },
     { name: 'Tasks', href: '/tasks', icon: ClipboardList },
     { name: 'Team', href: '/team', icon: Users },
+    { name: 'Settings', href: '/settings', icon: Settings },
   ];
-
-  if (user?.role === 'Admin') {
-    navigation.push({ name: 'Settings', href: '/settings', icon: Settings });
-  }
 
   const handleLogout = async () => {
     await logout();
@@ -51,7 +48,7 @@ const Layout = ({ children, showNotification = false, showTopBar = true, onlineC
             <div className="flex-shrink-0 flex items-center px-4 mb-8">
               <div className="flex items-center space-x-3">
                 <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-accent-500 rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-sm">T</span>
+                  <ClipboardList className="w-5 h-5 text-white" />
                 </div>
                 <h1 className="text-xl font-bold bg-gradient-to-r from-primary-400 to-accent-400 bg-clip-text text-transparent">
                   TaskFlow
@@ -89,7 +86,7 @@ const Layout = ({ children, showNotification = false, showTopBar = true, onlineC
               <div className="flex items-center flex-shrink-0 px-4 mb-8">
                 <div className="flex items-center space-x-3">
                   <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-accent-500 rounded-xl flex items-center justify-center shadow-lg">
-                    <span className="text-white font-bold text-lg">T</span>
+                    <ClipboardList className="w-6 h-6 text-white" />
                   </div>
                   <h1 className="text-2xl font-bold bg-gradient-to-r from-primary-400 to-accent-400 bg-clip-text text-transparent">
                     TaskFlow
@@ -120,11 +117,17 @@ const Layout = ({ children, showNotification = false, showTopBar = true, onlineC
               <div className="bg-dark-700/30 rounded-xl p-3 border border-dark-600/50">
                 <div className="flex items-center">
                   <div className="flex-shrink-0">
-                    <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center shadow-lg">
-                      <span className="text-sm font-bold text-white">
-                        {user?.firstName?.[0]}{user?.lastName?.[0]}
-                      </span>
-                    </div>
+                    {user?.profilePicture ? (
+                      <div className="h-12 w-12 rounded-xl overflow-hidden shadow-lg">
+                        <img src={user.profilePicture} alt={`${user.firstName} ${user.lastName}`} className="w-full h-full object-cover" />
+                      </div>
+                    ) : (
+                      <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center shadow-lg">
+                        <span className="text-sm font-bold text-white">
+                          {user?.firstName?.[0]}{user?.lastName?.[0]}
+                        </span>
+                      </div>
+                    )}
                   </div>
                   <div className="ml-3 flex-1 min-w-0">
                     <p className="text-sm font-semibold text-white truncate">{user?.firstName} {user?.lastName}</p>
@@ -149,13 +152,12 @@ const Layout = ({ children, showNotification = false, showTopBar = true, onlineC
       <div className="flex flex-col w-0 flex-1 overflow-hidden bg-dark-900">
         {/* Top header - conditionally rendered */}
         {showTopBar && (
-          <div className="bg-dark-900/50 backdrop-blur-sm px-4 py-3 relative z-50">
-            <div className="flex items-center justify-between">
-              {/* Logo */}
+          <div className="bg-dark-900/50 backdrop-blur-sm px-4 py-6 relative z-50 border-b border-dark-700/50">
+            <div className="flex items-center justify-between max-w-7xl mx-auto">
+              {/* Greeting - Left side */}
               <div className="flex items-center space-x-2">
-                <ClipboardList className="w-6 h-6 text-zinc-400" />
-                <h1 className="text-lg font-bold text-zinc-400 tracking-tight">
-                  TaskFlow
+                <h1 className="text-xl md:text-2xl font-bold text-white tracking-tight">
+                  Dashboard
                 </h1>
               </div>
 

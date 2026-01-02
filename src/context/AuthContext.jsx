@@ -137,12 +137,30 @@ export const AuthProvider = ({ children }) => {
     dispatch({ type: 'UPDATE_USER', payload: userData });
   };
 
+  const refreshUser = async () => {
+    try {
+      const response = await authAPI.getMe();
+      const user = response.data.user;
+      localStorage.setItem('user', JSON.stringify(user));
+      // Use LOGIN_SUCCESS to fully replace user data, not just merge
+      dispatch({ 
+        type: 'LOGIN_SUCCESS', 
+        payload: { user, token: state.token }
+      });
+      return user;
+    } catch (error) {
+      console.error('Failed to refresh user:', error);
+      return null;
+    }
+  };
+
   const value = {
     ...state,
     login,
     register,
     logout,
     updateUser,
+    refreshUser,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

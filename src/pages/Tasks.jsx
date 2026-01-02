@@ -18,6 +18,7 @@ import TaskCard from '../components/TaskCard';
 import QuickTaskModal from '../components/QuickTaskModal';
 import TaskDetailModal from '../components/TaskDetailModal';
 import TaskEditModal from '../components/TaskEditModal';
+import DeleteConfirmModal from '../components/DeleteConfirmModal';
 import Layout from '../components/Layout';
 
 const Tasks = () => {
@@ -37,6 +38,8 @@ const Tasks = () => {
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedTask, setSelectedTask] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [taskToDelete, setTaskToDelete] = useState(null);
   const [filters, setFilters] = useState({
     search: '',
     status: '',
@@ -79,7 +82,6 @@ const Tasks = () => {
     if (!socketService || !isConnected) return;
 
     const handleTaskCreated = (data) => {
-      console.log('Real-time: Task created', data.task);
       setTasks(prev => [data.task, ...prev]);
       // Show toast notification for real-time task creation by others
       if (data.task.createdBy?._id !== user._id && data.task.createdBy?.id !== user._id) {
@@ -90,14 +92,12 @@ const Tasks = () => {
     };
 
     const handleTaskUpdated = (data) => {
-      console.log('Real-time: Task updated', data.task);
       setTasks(prev => prev.map(task =>
         task._id === data.task._id ? data.task : task
       ));
     };
 
     const handleTaskDeleted = (data) => {
-      console.log('Real-time: Task deleted', data.taskId);
       setTasks(prev => prev.filter(task => task._id !== data.taskId));
     };
 
@@ -193,18 +193,24 @@ const Tasks = () => {
     }
   };
 
-  const handleTaskDelete = async (taskId) => {
-    if (window.confirm('Are you sure you want to delete this task?')) {
-      try {
-        await tasksAPI.deleteTask(taskId);
-        toast.success('Task deleted successfully!');
-        fetchTasks();
-      } catch (err) {
-        const errorMsg = 'Failed to delete task';
-        setError(errorMsg);
-        toast.error(errorMsg);
-        console.error('Error deleting task:', err);
-      }
+  const handleTaskDelete = (taskId) => {
+    setTaskToDelete(taskId);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!taskToDelete) return;
+    
+    try {
+      await tasksAPI.deleteTask(taskToDelete);
+      toast.success('Task deleted successfully!');
+      fetchTasks();
+      setTaskToDelete(null);
+    } catch (err) {
+      const errorMsg = 'Failed to delete task';
+      setError(errorMsg);
+      toast.error(errorMsg);
+      console.error('Error deleting task:', err);
     }
   };
 
@@ -658,6 +664,7 @@ const Tasks = () => {
         }}
         task={selectedTask}
         onEdit={(user?.role === 'Admin' || user?.role === 'Manager') ? handleTaskEdit : null}
+        onDelete={(user?.role === 'Admin' || user?.role === 'Manager') ? handleTaskDelete : null}
       />
 
       {/* Task Edit Modal */}
@@ -670,6 +677,18 @@ const Tasks = () => {
         task={selectedTask}
         onSave={handleTaskSave}
         userRole={user?.role}
+      />
+
+      {/* Delete Confirmation Modal */}
+      <DeleteConfirmModal
+        isOpen={showDeleteModal}
+        onClose={() => {
+          setShowDeleteModal(false);
+          setTaskToDelete(null);
+        }}
+        onConfirm={confirmDelete}
+        title="Delete Task"
+        message="Are you sure you want to delete this task? This action cannot be undone."
       />
     </Layout>
   );

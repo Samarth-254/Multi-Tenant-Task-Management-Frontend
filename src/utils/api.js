@@ -60,6 +60,7 @@ export const usersAPI = {
   getProfile: () => api.get('/users/profile'),
   updateProfile: (data) => api.put('/users/profile', data),
   getUser: (userId) => api.get(`/users/${userId}`),
+  updateUserById: (userId, data) => api.put(`/users/${userId}`, data),
   updateRole: (userId, role) => api.put(`/users/${userId}/role`, { role }),
   deactivateUser: (userId) => api.put(`/users/${userId}/deactivate`),
   activateUser: (userId) => api.put(`/users/${userId}/activate`),
