@@ -92,8 +92,8 @@ const QuickTaskModal = ({ isOpen, onClose, onTaskCreated }) => {
 
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center z-50 p-0 sm:p-4">
-      <div className="bg-zinc-900 border border-zinc-800 rounded-t-2xl sm:rounded-2xl w-full max-w-md shadow-2xl max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between p-4 sm:p-6 border-b border-zinc-800 sticky top-0 bg-zinc-900 z-10">
+      <div className="bg-zinc-900 border border-zinc-800 rounded-t-2xl sm:rounded-2xl w-full max-w-md shadow-2xl max-h-[85vh] sm:max-h-[90vh] flex flex-col">
+        <div className="flex items-center justify-between p-4 sm:p-6 border-b border-zinc-800 bg-zinc-900 z-10 flex-shrink-0">
           <div className="flex items-center space-x-2">
             <Zap className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
             <h2 className="text-lg sm:text-xl font-semibold text-white">Quick Task</h2>
@@ -106,7 +106,8 @@ const QuickTaskModal = ({ isOpen, onClose, onTaskCreated }) => {
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-3 sm:space-y-4">
+        <form onSubmit={handleSubmit} className="flex flex-col flex-1 overflow-hidden">
+          <div className="p-4 sm:p-6 space-y-3 sm:space-y-4 overflow-y-auto flex-1">
           {error && (
             <div className="bg-red-500/10 border border-red-500/20 text-red-400 px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg text-xs sm:text-sm">
               {error}
@@ -228,19 +229,21 @@ const QuickTaskModal = ({ isOpen, onClose, onTaskCreated }) => {
             </div>
           </div>
 
-          {/* Action Buttons */}
-          <div className="flex justify-end space-x-2 sm:space-x-3 pt-3 sm:pt-4">
+          </div>
+
+          {/* Action Buttons - Sticky at bottom with extra padding for mobile nav */}
+          <div className="flex justify-end space-x-2 sm:space-x-3 p-4 pb-20 sm:p-6 sm:pb-6 pt-3 sm:pt-4 border-t border-zinc-800 bg-zinc-900 flex-shrink-0">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 sm:px-6 py-2 bg-zinc-800 hover:bg-zinc-700 text-white rounded-lg transition-colors text-sm"
+              className="px-4 sm:px-6 py-2.5 sm:py-2 bg-zinc-800 hover:bg-zinc-700 text-white rounded-lg transition-colors text-sm"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="btn-primary px-4 sm:px-6 py-2 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-1.5 sm:space-x-2 text-sm"
+              className="btn-primary px-4 sm:px-6 py-2.5 sm:py-2 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-1.5 sm:space-x-2 text-sm"
             >
               {loading ? (
                 <>

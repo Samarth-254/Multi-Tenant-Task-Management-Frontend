@@ -11,14 +11,10 @@ const TaskEditModal = ({ isOpen, onClose, task, onSave, userRole }) => {
     status: 'Todo',
     priority: 'Medium',
     dueDate: '',
-    estimatedHours: '',
-    actualHours: '',
-    assignedTo: '',
-    tags: []
+    assignedTo: ''
   });
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [tagInput, setTagInput] = useState('');
 
   useEffect(() => {
     if (isOpen && task) {
@@ -28,10 +24,7 @@ const TaskEditModal = ({ isOpen, onClose, task, onSave, userRole }) => {
         status: task.status || 'Todo',
         priority: task.priority || 'Medium',
         dueDate: task.dueDate ? new Date(task.dueDate).toISOString().split('T')[0] : '',
-        estimatedHours: task.estimatedHours || '',
-        actualHours: task.actualHours || '',
-        assignedTo: task.assignedTo?._id || '',
-        tags: task.tags || []
+        assignedTo: task.assignedTo?._id || ''
       });
       fetchUsers();
     }
@@ -51,26 +44,6 @@ const TaskEditModal = ({ isOpen, onClose, task, onSave, userRole }) => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleAddTag = (e) => {
-    if (e.key === 'Enter' && tagInput.trim()) {
-      e.preventDefault();
-      if (!formData.tags.includes(tagInput.trim())) {
-        setFormData(prev => ({
-          ...prev,
-          tags: [...prev.tags, tagInput.trim()]
-        }));
-      }
-      setTagInput('');
-    }
-  };
-
-  const handleRemoveTag = (tagToRemove) => {
-    setFormData(prev => ({
-      ...prev,
-      tags: prev.tags.filter(tag => tag !== tagToRemove)
-    }));
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -84,14 +57,6 @@ const TaskEditModal = ({ isOpen, onClose, task, onSave, userRole }) => {
           updateData[key] = undefined;
         }
       });
-
-      // Convert numeric fields
-      if (updateData.estimatedHours) {
-        updateData.estimatedHours = parseFloat(updateData.estimatedHours);
-      }
-      if (updateData.actualHours) {
-        updateData.actualHours = parseFloat(updateData.actualHours);
-      }
 
       await onSave(task._id, updateData);
       toast.success('Task updated successfully!');
@@ -238,87 +203,11 @@ const TaskEditModal = ({ isOpen, onClose, task, onSave, userRole }) => {
             />
           </div>
 
-          {/* Time Tracking Row */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Estimated Hours */}
-            <div>
-              <label className="block text-sm font-medium text-zinc-300 mb-2">
-                <Clock className="w-4 h-4 inline mr-1" />
-                Estimated Hours
-              </label>
-              <input
-                type="number"
-                name="estimatedHours"
-                value={formData.estimatedHours}
-                onChange={handleInputChange}
-                disabled={canOnlyEditStatus}
-                min="0"
-                step="0.5"
-                className="w-full px-4 py-2 bg-zinc-800 border border-zinc-700 text-white rounded-lg focus:outline-none focus:border-zinc-600 transition-colors"
-              />
-            </div>
-
-            {/* Actual Hours */}
-            <div>
-              <label className="block text-sm font-medium text-zinc-300 mb-2">
-                <Clock className="w-4 h-4 inline mr-1" />
-                Actual Hours
-              </label>
-              <input
-                type="number"
-                name="actualHours"
-                value={formData.actualHours}
-                onChange={handleInputChange}
-                min="0"
-                step="0.5"
-                className="w-full px-4 py-2 bg-zinc-800 border border-zinc-700 text-white rounded-lg focus:outline-none focus:border-zinc-600 transition-colors"
-              />
-            </div>
-          </div>
-
-          {/* Tags */}
-          {canEditAllFields && (
-            <div>
-              <label className="block text-sm font-medium text-zinc-300 mb-2">
-                Tags
-              </label>
-              <div className="space-y-2">
-                <input
-                  type="text"
-                  value={tagInput}
-                  onChange={(e) => setTagInput(e.target.value)}
-                  onKeyDown={handleAddTag}
-                  placeholder="Type a tag and press Enter"
-                  className="w-full px-4 py-2 bg-zinc-800 border border-zinc-700 text-white placeholder-zinc-500 rounded-lg focus:outline-none focus:border-zinc-600 transition-colors"
-                />
-                {formData.tags.length > 0 && (
-                  <div className="flex flex-wrap gap-2">
-                    {formData.tags.map((tag, index) => (
-                      <span
-                        key={index}
-                        className="inline-flex items-center gap-1 px-3 py-1 bg-zinc-800 text-zinc-300 text-sm rounded-full border border-zinc-700"
-                      >
-                        #{tag}
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveTag(tag)}
-                          className="text-zinc-400 hover:text-white"
-                        >
-                          <X className="w-3 h-3" />
-                        </button>
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-
           {/* Role-based Info */}
           {canOnlyEditStatus && (
             <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-4">
               <p className="text-yellow-400 text-sm">
-                <strong>Note:</strong> As a Member, you can only update the status and actual hours of your assigned tasks.
+                <strong>Note:</strong> As a Member, you can only update the status of your assigned tasks.
               </p>
             </div>
           )}
