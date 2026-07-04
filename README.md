@@ -1,4 +1,4 @@
-# 🏢 TaskFlow: Multi-Tenant Task Management Client
+# TaskFlow: Multi-Tenant Task Management Client
 
 > **TaskFlow** is a modern, high-performance React 19 client application designed for multi-tenant organizations. It delivers a secure, real-time workspace for team collaboration, task tracking, interactive productivity analytics, and role-based access management.
 >
@@ -24,7 +24,7 @@ Comprehensive account settings, password updates, profile management, and granul
 
 ---
 
-## 🛠️ Technical Highlights (For Recruiters)
+## 🛠️ Technical Highlights
 
 This frontend client implements several enterprise-grade patterns and engineering solutions:
 
